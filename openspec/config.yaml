@@ -1,0 +1,11 @@
+project: weplaybasketball
+persistence: openspec
+session:
+  execution_mode: autonomous
+  delivery_strategy: chained_prs
+  review_budget: 800
+  artifact_store: openspec
+testing:
+  strict_tdd: false
+  test_runner: none
+  note: "New project — no test infrastructure yet"

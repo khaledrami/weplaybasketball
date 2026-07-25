@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "WePlayBasketball",
+    "slug": "weplaybasketball",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "weplaybasketball",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.weplaybasketball.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "package": "com.weplaybasketball.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-status-bar",
+      "expo-localization",
+      [
+        "react-native-maps",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Permetre a WePlayBasketball accedir a la vostra ubicació per mostrar pistes properes."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
