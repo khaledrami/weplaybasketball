@@ -10,6 +10,7 @@ import {
   Platform,
   Linking,
   ActivityIndicator,
+  ImageBackground,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from '../../lib/i18n';
@@ -61,6 +62,24 @@ export default function MapScreen() {
         </View>
       ) : (
         <>
+          {/* Web hero banner - Badalona basketball */}
+          {Platform.OS === 'web' && (
+            <View style={styles.heroBanner}>
+              <ImageBackground
+                source={{ uri: 'https://images.unsplash.com/photo-1504609813442-a8924e9038ad?w=1200&q=80' }}
+                style={styles.heroImage}
+                resizeMode="cover"
+              >
+                <View style={styles.heroOverlay}>
+                  <View style={styles.heroContent}>
+                    <Text style={styles.heroTitle}>{t('app_name')}</Text>
+                    <Text style={styles.heroSubtitle}>{t('map.hero_subtitle')}</Text>
+                  </View>
+                </View>
+              </ImageBackground>
+            </View>
+          )}
+
           <View style={styles.searchContainer}>
             <View style={styles.searchBox}>
               <Ionicons name="search" size={22} color="#6C757D" />
@@ -72,6 +91,19 @@ export default function MapScreen() {
                 clearButtonMode="while-editing"
               />
             </View>
+          </View>
+
+          <View style={styles.heroBanner}>
+            <ImageBackground
+              source={{ uri: 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=1200&h=400&fit=crop' }}
+              style={styles.heroImage}
+              resizeMode="cover"
+            >
+              <View style={styles.heroOverlay}>
+                <Text style={styles.heroTitle}>{t('app_name')}</Text>
+                <Text style={styles.heroSubtitle}>{t('map.hero_subtitle')}</Text>
+              </View>
+            </ImageBackground>
           </View>
 
           <View style={styles.filterRow}>
@@ -104,8 +136,7 @@ export default function MapScreen() {
           <View style={styles.mapContainer}>
             <WebMapView
               courts={filteredCourts}
-              onPress={handleCourtPress}
-              t={t}
+              onCourtPress={handleCourtPress}
             />
           </View>
 
@@ -301,16 +332,6 @@ function CourtListItem({ court, onPress, t }: { court: Court; onPress: () => voi
       </View>
       <Ionicons name="chevron-forward" size={20} color="#6C757D" />
     </TouchableOpacity>
-  );
-}
-
-function WebMapView({ courts, onPress, t }: { courts: Court[]; onPress: (court: Court) => void; t: any }) {
-  return (
-    <View style={styles.mapContainer}>
-      <View style={styles.centered}>
-        <Text style={{ color: '#6C757D', fontSize: 14 }}>{t('map.loading')}</Text>
-      </View>
-    </View>
   );
 }
 
@@ -585,5 +606,42 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
+  },
+  heroBanner: {
+    height: 220,
+    marginHorizontal: 16,
+    marginTop: 8,
+    marginBottom: 16,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  heroImage: {
+    flex: 1,
+  },
+  heroOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(29, 53, 87, 0.75)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  heroContent: {
+    alignItems: 'center',
+  },
+  heroTitle: {
+    fontSize: 36,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginBottom: 8,
+    letterSpacing: -0.5,
+    textShadowColor: 'rgba(0,0,0,0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+  heroSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.9)',
+    textAlign: 'center',
+    maxWidth: 400,
   },
 });
