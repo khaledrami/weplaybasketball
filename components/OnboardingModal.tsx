@@ -10,7 +10,7 @@ const slides = [
   {
     illustration: OnboardingFindCourts,
     title: 'Troba pistes',
-    description: 'Descobreix totes les pistes de bàsquet de Badalona, del Pont del Petroli al Gorg.',
+    description: 'Descobreix totes les pistes de bàsquet de Badalona, del Pont del Petroli al Manresà.',
   },
   {
     illustration: OnboardingFindPlayers,
