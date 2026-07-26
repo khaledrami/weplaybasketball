@@ -5,7 +5,7 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  FlatList,
+  ScrollView,
   Modal,
   Platform,
   Linking,
@@ -14,15 +14,17 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from '../../lib/i18n';
+import { useTheme } from '../../lib/theme';
 import { fetchCourts } from '../../lib/courts';
 import { Court } from '../../lib/types';
 import { Ionicons } from '@expo/vector-icons';
 import { COURT_TYPE_KEYS } from '../../lib/constants';
-import { PhotoUpload } from '../../components/court/PhotoUpload';
+import PhotoUpload from '../../components/court/PhotoUpload';
 import WebMapView from '../../components/WebMapView';
 
 export default function MapScreen() {
   const { t } = useTranslation();
+  const { colors, spacing, borderRadius, typography, shadows, courtAccessColors } = useTheme();
   const router = useRouter();
   const [courts, setCourts] = useState<Court[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,109 +57,165 @@ export default function MapScreen() {
     return matchesSearch && matchesFilter;
   });
 
+  const getAccessLabel = (type: string) => {
+    if (type === 'lliure') return t('map.access_free');
+    if (type === 'restringit') return t('map.access_restricted');
+    return t('map.access_partial');
+  };
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.surfaceElevated }]}>
       {loading ? (
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color="#E76F51" />
+          <ActivityIndicator size="large" color={colors.secondary} />
         </View>
       ) : (
         <>
-          {/* Web hero banner - Badalona basketball */}
-          {Platform.OS === 'web' && (
+          <ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={{ paddingBottom: 24 }}
+            showsVerticalScrollIndicator={true}
+          >
+            {/* Hero banner */}
             <View style={styles.heroBanner}>
               <ImageBackground
                 source={{ uri: 'https://images.unsplash.com/photo-1504609813442-a8924e9038ad?w=1200&q=80' }}
                 style={styles.heroImage}
                 resizeMode="cover"
               >
-                <View style={styles.heroOverlay}>
+                <View style={[styles.heroOverlay, { backgroundColor: colors.overlayStrong }]}>
                   <View style={styles.heroContent}>
-                    <Text style={styles.heroTitle}>{t('app_name')}</Text>
-                    <Text style={styles.heroSubtitle}>{t('map.hero_subtitle')}</Text>
+                    <Text style={[styles.heroTitle, { color: colors.textOnPrimary }]}>{t('app_name')}</Text>
+                    <Text style={[styles.heroSubtitle, { color: colors.textOnPrimary }]}>{t('map.hero_subtitle')}</Text>
                   </View>
                 </View>
               </ImageBackground>
             </View>
-          )}
 
-          <View style={styles.searchContainer}>
-            <View style={styles.searchBox}>
-              <Ionicons name="search" size={22} color="#6C757D" />
-              <TextInput
-                style={styles.searchInput}
-                placeholder={t('map.search')}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                clearButtonMode="while-editing"
+            <View style={styles.searchContainer}>
+              <View style={[styles.searchBox, { backgroundColor: colors.surface, ...shadows.level2 }]}>
+                <Ionicons name="search" size={22} color={colors.textSecondary} />
+                <TextInput
+                  style={[styles.searchInput, { color: colors.textPrimary }]}
+                  placeholder={t('map.search')}
+                  placeholderTextColor={colors.textMuted}
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  clearButtonMode="while-editing"
+                />
+              </View>
+            </View>
+
+            <View style={styles.filterRow}>
+              <TouchableOpacity
+                style={[
+                  styles.filterButton,
+                  { backgroundColor: colors.surface, ...shadows.level1 },
+                  filter === 'all' && { backgroundColor: colors.primary },
+                ]}
+                onPress={() => setFilter('all')}
+              >
+                <Text
+                  style={[
+                    styles.filterText,
+                    { color: colors.textPrimary },
+                    filter === 'all' && { color: colors.textOnPrimary },
+                  ]}
+                >
+                  {t('map.filter_all')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.filterButton,
+                  { backgroundColor: colors.surface, ...shadows.level1 },
+                  filter === 'lliure' && { backgroundColor: colors.success },
+                ]}
+                onPress={() => setFilter('lliure')}
+              >
+                <Text
+                  style={[
+                    styles.filterText,
+                    { color: colors.textPrimary },
+                    filter === 'lliure' && { color: colors.textOnPrimary },
+                  ]}
+                >
+                  {t('map.access_free')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.filterButton,
+                  { backgroundColor: colors.surface, ...shadows.level1 },
+                  filter === 'restringit' && { backgroundColor: colors.danger },
+                ]}
+                onPress={() => setFilter('restringit')}
+              >
+                <Text
+                  style={[
+                    styles.filterText,
+                    { color: colors.textPrimary },
+                    filter === 'restringit' && { color: colors.textOnPrimary },
+                  ]}
+                >
+                  {t('map.access_restricted')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.filterButton,
+                  { backgroundColor: colors.surface, ...shadows.level1 },
+                  filter === 'parcial' && { backgroundColor: colors.warning },
+                ]}
+                onPress={() => setFilter('parcial')}
+              >
+                <Text
+                  style={[
+                    styles.filterText,
+                    { color: colors.textPrimary },
+                    filter === 'parcial' && { color: colors.textOnPrimary },
+                  ]}
+                >
+                  {t('map.access_partial')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={[styles.mapContainer, { borderRadius: borderRadius.xl }]}>
+              <WebMapView
+                courts={filteredCourts}
+                onCourtPress={handleCourtPress}
               />
             </View>
-          </View>
 
-          <View style={styles.heroBanner}>
-            <ImageBackground
-              source={{ uri: 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=1200&h=400&fit=crop' }}
-              style={styles.heroImage}
-              resizeMode="cover"
-            >
-              <View style={styles.heroOverlay}>
-                <Text style={styles.heroTitle}>{t('app_name')}</Text>
-                <Text style={styles.heroSubtitle}>{t('map.hero_subtitle')}</Text>
-              </View>
-            </ImageBackground>
-          </View>
-
-          <View style={styles.filterRow}>
-            <TouchableOpacity
-              style={[styles.filterButton, filter === 'all' && styles.filterActive]}
-              onPress={() => setFilter('all')}
-            >
-              <Text style={[styles.filterText, filter === 'all' && styles.filterTextActive]}>{t('map.filter_all')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.filterButton, filter === 'lliure' && styles.filterActiveGreen]}
-              onPress={() => setFilter('lliure')}
-            >
-              <Text style={[styles.filterText, filter === 'lliure' && styles.filterTextActive]}>{t('map.access_free')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.filterButton, filter === 'restringit' && styles.filterActiveRed]}
-              onPress={() => setFilter('restringit')}
-            >
-              <Text style={[styles.filterText, filter === 'restringit' && styles.filterTextActive]}>{t('map.access_restricted')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.filterButton, filter === 'parcial' && styles.filterActiveYellow]}
-              onPress={() => setFilter('parcial')}
-            >
-              <Text style={[styles.filterText, filter === 'parcial' && styles.filterTextActive]}>{t('map.access_partial')}</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.mapContainer}>
-            <WebMapView
-              courts={filteredCourts}
-              onCourtPress={handleCourtPress}
-            />
-          </View>
-
-          <FlatList
-            data={filteredCourts}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <CourtListItem court={item} onPress={() => handleCourtPress(item)} t={t} />
-            )}
-            contentContainerStyle={styles.listContent}
-            ListEmptyComponent={
-              <View style={styles.centered}>
-                <Text style={{ fontSize: 56 }}>🏟️</Text>
-                <Text style={styles.emptyText}>{t('map.no_courts')}</Text>
-                <Text style={[styles.emptyText, { fontSize: 13, color: '#6C757D', marginTop: 4 }]}>
-                  {t('map.no_courts_hint')}
-                </Text>
-              </View>
-            }
-          />
+            {/* Courts list - rendered directly inside ScrollView */}
+            <View style={styles.listContent}>
+              {filteredCourts.length === 0 ? (
+                <View style={styles.centered}>
+                  <Text style={{ fontSize: 56 }}>🏟️</Text>
+                  <Text style={[styles.emptyText, { color: colors.textSecondary }]}>{t('map.no_courts')}</Text>
+                  <Text style={[styles.emptyText, { fontSize: 13, color: colors.textMuted, marginTop: 4 }]}>
+                    {t('map.no_courts_hint')}
+                  </Text>
+                </View>
+              ) : (
+                filteredCourts.map((court) => (
+                  <CourtListItem
+                    key={court.id}
+                    court={court}
+                    onPress={() => handleCourtPress(court)}
+                    t={t}
+                    colors={colors}
+                    courtAccessColors={courtAccessColors}
+                    borderRadius={borderRadius}
+                    spacing={spacing}
+                    shadows={shadows}
+                    typography={typography}
+                  />
+                ))
+              )}
+            </View>
+          </ScrollView>
 
           <Modal
             visible={showCourtModal}
@@ -165,26 +223,26 @@ export default function MapScreen() {
             transparent={true}
             onRequestClose={() => setShowCourtModal(false)}
           >
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalContent}>
+            <View style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}>
+              <View style={[styles.modalContent, { backgroundColor: colors.surface, borderTopLeftRadius: borderRadius.xxl, borderTopRightRadius: borderRadius.xxl, ...shadows.level4 }]}>
                 {selectedCourt && (
                   <>
                     <View style={styles.modalHeader}>
-                      <Text style={styles.modalTitle}>{selectedCourt.name}</Text>
+                      <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>{selectedCourt.name}</Text>
                       <TouchableOpacity onPress={() => setShowCourtModal(false)}>
-                        <Ionicons name="close" size={24} color="#6C757D" />
+                        <Ionicons name="close" size={24} color={colors.textSecondary} />
                       </TouchableOpacity>
                     </View>
 
-                    <Text style={styles.modalAddress}>{selectedCourt.address || selectedCourt.barrio || t('matches.defaultCity')}</Text>
+                    <Text style={[styles.modalAddress, { color: colors.textSecondary }]}>{selectedCourt.address || selectedCourt.barrio || t('matches.defaultCity')}</Text>
                     {selectedCourt.barrio && (
-                      <Text style={styles.modalBarrio}>{selectedCourt.barrio}</Text>
+                      <Text style={[styles.modalBarrio, { color: colors.secondary }]}>{selectedCourt.barrio}</Text>
                     )}
 
-                    <View style={styles.mapEmbedContainer}>
+                    <View style={[styles.mapEmbedContainer, { borderRadius: borderRadius.xl }]}>
                       <iframe
                         src={`https://www.openstreetmap.org/export/embed.html?bbox=${selectedCourt.lng - 0.005},${selectedCourt.lat - 0.003},${selectedCourt.lng + 0.005},${selectedCourt.lat + 0.003}&layer=mapnik&marker=${selectedCourt.lat},${selectedCourt.lng}`}
-                        style={{ width: '100%', height: 200, border: 'none', borderRadius: 12 }}
+                        style={{ width: '100%', height: 200, border: 'none', borderRadius: borderRadius.xl }}
                         loading="lazy"
                         title={`Mapa de ${selectedCourt.name}`}
                       />
@@ -195,41 +253,39 @@ export default function MapScreen() {
                         style={styles.mapEmbedLink}
                         onPress={() => Linking.openURL(`https://www.openstreetmap.org/?mlat=${selectedCourt.lat}&mlon=${selectedCourt.lng}#map=17/${selectedCourt.lat}/${selectedCourt.lng}`)}
                       >
-                        <Ionicons name="map" size={16} color="#1D3557" />
-                        <Text style={styles.mapEmbedLinkText}>{t('map.open_in_map')}</Text>
+                        <Ionicons name="map" size={16} color={colors.primary} />
+                        <Text style={[styles.mapEmbedLinkText, { color: colors.primary }]}>{t('map.open_in_map')}</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={styles.mapEmbedLink}
                         onPress={() => Linking.openURL(`https://www.google.com/maps/@${selectedCourt.lat},${selectedCourt.lng},3a,75y,90t/data=!3m7!1e1!3m5!1sAF1QipMx!2e10!3e11!7i5376!8i2688`)}
                       >
-                        <Ionicons name="videocam" size={16} color="#1D3557" />
-                        <Text style={styles.mapEmbedLinkText}>{t('map.street_view')}</Text>
+                        <Ionicons name="videocam" size={16} color={colors.primary} />
+                        <Text style={[styles.mapEmbedLinkText, { color: colors.primary }]}>{t('map.street_view')}</Text>
                       </TouchableOpacity>
                     </View>
 
-                    <View style={styles.modalInfo}>
+                    <View style={[styles.modalInfo, { gap: spacing[3] }]}>
                       <View style={styles.modalInfoRow}>
-                        <Ionicons name="location" size={20} color="#1D3557" />
-                        <Text style={styles.modalInfoText}>
-                          {selectedCourt.access_type === 'lliure' ? t('map.access_free') :
-                           selectedCourt.access_type === 'restringit' ? t('map.access_restricted') :
-                           t('map.access_partial')}
+                        <Ionicons name="location" size={20} color={colors.primary} />
+                        <Text style={[styles.modalInfoText, { color: colors.textPrimary }]}>
+                          {getAccessLabel(selectedCourt.access_type)}
                         </Text>
                       </View>
                       <View style={styles.modalInfoRow}>
-                        <Ionicons name="basketball" size={20} color="#1D3557" />
-                        <Text style={styles.modalInfoText}>{selectedCourt.hoops || 2} {t('map.hoops')}</Text>
+                        <Ionicons name="basketball" size={20} color={colors.primary} />
+                        <Text style={[styles.modalInfoText, { color: colors.textPrimary }]}>{selectedCourt.hoops || 2} {t('map.hoops')}</Text>
                       </View>
                       <View style={styles.modalInfoRow}>
-                        <Ionicons name="home" size={20} color="#1D3557" />
-                        <Text style={styles.modalInfoText}>
+                        <Ionicons name="home" size={20} color={colors.primary} />
+                        <Text style={[styles.modalInfoText, { color: colors.textPrimary }]}>
                           {t(COURT_TYPE_KEYS[selectedCourt.court_type ?? 'outdoor'] ?? 'map.exterior')}
                         </Text>
                       </View>
                       {selectedCourt.has_lighting !== undefined && (
                         <View style={styles.modalInfoRow}>
-                          <Ionicons name="bulb" size={20} color={selectedCourt.has_lighting ? '#2D9CDB' : '#6C757D'} />
-                          <Text style={styles.modalInfoText}>
+                          <Ionicons name="bulb" size={20} color={selectedCourt.has_lighting ? colors.tertiary : colors.textMuted} />
+                          <Text style={[styles.modalInfoText, { color: colors.textPrimary }]}>
                             {selectedCourt.has_lighting ? t('map.lit') : t('map.no_lighting')}
                           </Text>
                         </View>
@@ -237,28 +293,28 @@ export default function MapScreen() {
                     </View>
 
                     {selectedCourt.manager && (
-                      <View style={styles.modalManager}>
-                        <Text style={styles.modalManagerLabel}>{t('map.manager')}</Text>
-                        <Text style={styles.modalManagerValue}>{selectedCourt.manager}</Text>
+                      <View style={[styles.modalManager, { borderTopColor: colors.border }]}>
+                        <Text style={[styles.modalManagerLabel, { color: colors.textSecondary }]}>{t('map.manager')}</Text>
+                        <Text style={[styles.modalManagerValue, { color: colors.textPrimary }]}>{selectedCourt.manager}</Text>
                       </View>
                     )}
 
                     {selectedCourt.phone && (
-                      <View style={styles.modalManager}>
-                        <Text style={styles.modalManagerLabel}>{t('map.phone')}</Text>
-                        <Text style={styles.modalManagerValue}>{selectedCourt.phone}</Text>
+                      <View style={[styles.modalManager, { borderTopColor: colors.border }]}>
+                        <Text style={[styles.modalManagerLabel, { color: colors.textSecondary }]}>{t('map.phone')}</Text>
+                        <Text style={[styles.modalManagerValue, { color: colors.textPrimary }]}>{selectedCourt.phone}</Text>
                       </View>
                     )}
 
                     {selectedCourt.opening_hours && (
                       <View style={styles.modalInfoRow}>
-                        <Ionicons name="time" size={20} color="#F4A261" />
-                        <Text style={styles.modalInfoText}>{selectedCourt.opening_hours}</Text>
+                        <Ionicons name="time" size={20} color={colors.warning} />
+                        <Text style={[styles.modalInfoText, { color: colors.textPrimary }]}>{selectedCourt.opening_hours}</Text>
                       </View>
                     )}
 
                     <TouchableOpacity
-                      style={styles.directionsButton}
+                      style={[styles.directionsButton, { backgroundColor: colors.primary, borderRadius: borderRadius.xl, ...shadows.level3 }]}
                       onPress={() => {
                         const url = Platform.select({
                           web: `https://www.google.com/maps/dir/?api=1&destination=${selectedCourt.lat},${selectedCourt.lng}`,
@@ -267,27 +323,27 @@ export default function MapScreen() {
                         Linking.openURL(url);
                       }}
                     >
-                      <Ionicons name="navigate" size={20} color="#FFFFFF" />
-                      <Text style={styles.directionsButtonText}>{t('map.directions')}</Text>
+                      <Ionicons name="navigate" size={20} color={colors.textOnPrimary} />
+                      <Text style={[styles.directionsButtonText, { color: colors.textOnPrimary }]}>{t('map.directions')}</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                      style={styles.createMatchButton}
+                      style={[styles.createMatchButton, { backgroundColor: colors.secondary, borderRadius: borderRadius.xl, ...shadows.level3 }]}
                       onPress={() => {
                         setShowCourtModal(false);
                         router.push(`/(tabs)/matches/create?courtId=${selectedCourt.id}`);
                       }}
                     >
-                      <Ionicons name="add-circle" size={20} color="#FFFFFF" />
-                      <Text style={styles.createMatchButtonText}>{t('map.create_match')}</Text>
+                      <Ionicons name="add-circle" size={20} color={colors.textOnSecondary} />
+                      <Text style={[styles.createMatchButtonText, { color: colors.textOnSecondary }]}>{t('map.create_match')}</Text>
                     </TouchableOpacity>
 
-                    <View style={styles.modalSource}>
-                      <Ionicons name="checkmark-circle" size={14} color={selectedCourt.confidence === 'high' ? '#2D9CDB' : '#F4A261'} />
-                      <Text style={styles.modalSourceLabel}>
+                    <View style={[styles.modalSource, { borderTopColor: colors.border }]}>
+                      <Ionicons name="checkmark-circle" size={14} color={selectedCourt.confidence === 'high' ? colors.tertiary : colors.warning} />
+                      <Text style={[styles.modalSourceLabel, { color: colors.textSecondary }]}>
                         {selectedCourt.confidence === 'high' ? t('map.verified_data') : t('map.approx_data')}
                       </Text>
-                      <Text style={styles.modalSourceValue}>
+                      <Text style={[styles.modalSourceValue, { color: colors.textSecondary }]}>
                         {' · '}
                         {selectedCourt.source.includes('merged') ? 'Diputació + OSM' :
                          selectedCourt.source === 'diba' ? 'Diputació de Barcelona' :
@@ -309,29 +365,94 @@ export default function MapScreen() {
   );
 }
 
-function CourtListItem({ court, onPress, t }: { court: Court; onPress: () => void; t: any }) {
-  const accessColors: Record<string, string> = {
-    lliure: '#2D9CDB',
-    restringit: '#E74C3C',
-    parcial: '#F4A261',
-  };
-
+function CourtListItem({
+  court,
+  onPress,
+  t,
+  colors,
+  courtAccessColors,
+  borderRadius,
+  spacing,
+  shadows,
+  typography,
+}: {
+  court: Court;
+  onPress: () => void;
+  t: any;
+  colors: any;
+  courtAccessColors: any;
+  borderRadius: any;
+  spacing: any;
+  shadows: any;
+  typography: any;
+}) {
   return (
-    <TouchableOpacity style={styles.listItem} onPress={onPress}>
-      <View style={[styles.listDot, { backgroundColor: accessColors[court.access_type] || '#6C757D' }]} />
+    <TouchableOpacity
+      style={[
+        styles.listItem,
+        {
+          backgroundColor: colors.surface,
+          borderRadius: borderRadius.xl,
+          padding: spacing[4],
+          marginBottom: spacing[3],
+          ...shadows.level2,
+        },
+      ]}
+      onPress={onPress}
+    >
+      <View
+        style={[
+          styles.listDot,
+          {
+            backgroundColor: courtAccessColors[court.access_type] || colors.textMuted,
+            width: spacing[3],
+            height: spacing[3],
+            borderRadius: spacing[3] / 2,
+            marginRight: spacing[4],
+          },
+        ]}
+      />
       <View style={styles.listItemContent}>
-        <Text style={styles.listItemTitle}>{court.name}</Text>
-        <Text style={styles.listItemAddress}>{court.address || court.barrio || t('matches.defaultCity')}</Text>
-        <View style={styles.listItemTags}>
-          <Text style={[styles.listItemTag, { backgroundColor: '#EDF2F7', color: '#1D3557' }]}>
+        <Text style={[styles.listItemTitle, { color: colors.textPrimary, fontSize: typography.fontSizes.bodyLarge, fontWeight: typography.fontWeights.semiBold, marginBottom: spacing[1] }]}>
+          {court.name}
+        </Text>
+        <Text style={[styles.listItemAddress, { color: colors.textSecondary, fontSize: typography.fontSizes.bodySmall, marginBottom: spacing[2] }]}>
+          {court.address || court.barrio || t('matches.defaultCity')}
+        </Text>
+        <View style={[styles.listItemTags, { gap: spacing[2] }]}>
+          <Text
+            style={[
+              styles.listItemTag,
+              {
+                backgroundColor: colors.surfaceHover,
+                color: colors.textPrimary,
+                fontSize: typography.fontSizes.labelMedium,
+                paddingHorizontal: spacing[3],
+                paddingVertical: spacing[1],
+                borderRadius: borderRadius.md,
+              },
+            ]}
+          >
             {t(court.access_type === 'lliure' ? 'map.access_free' : court.access_type === 'restringit' ? 'map.access_restricted' : 'map.access_partial')}
           </Text>
-          <Text style={[styles.listItemTag, { backgroundColor: '#FEF3E2', color: '#E76F51' }]}>
+          <Text
+            style={[
+              styles.listItemTag,
+              {
+                backgroundColor: colors.surfaceHover,
+                color: colors.secondary,
+                fontSize: typography.fontSizes.labelMedium,
+                paddingHorizontal: spacing[3],
+                paddingVertical: spacing[1],
+                borderRadius: borderRadius.md,
+              },
+            ]}
+          >
             {court.hoops || 2} {t('map.hoops')}
           </Text>
         </View>
       </View>
-      <Ionicons name="chevron-forward" size={20} color="#6C757D" />
+      <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
     </TouchableOpacity>
   );
 }
@@ -339,7 +460,6 @@ function CourtListItem({ court, onPress, t }: { court: Court; onPress: () => voi
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
   },
   centered: {
     flex: 1,
@@ -353,21 +473,14 @@ const styles = StyleSheet.create({
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
     borderRadius: 14,
     paddingHorizontal: 14,
     height: 50,
-    shadowColor: '#1D3557',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 2,
   },
   searchInput: {
     flex: 1,
     marginLeft: 10,
     fontSize: 16,
-    color: '#1C1C2E',
   },
   filterRow: {
     flexDirection: 'row',
@@ -379,38 +492,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#1D3557',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  filterActive: {
-    backgroundColor: '#1D3557',
-  },
-  filterActiveGreen: {
-    backgroundColor: '#2D9CDB',
-  },
-  filterActiveRed: {
-    backgroundColor: '#E74C3C',
-  },
-  filterActiveYellow: {
-    backgroundColor: '#F4A261',
   },
   filterText: {
     fontSize: 12,
-    color: '#1C1C2E',
-  },
-  filterTextActive: {
-    color: '#FFFFFF',
-    fontWeight: '600',
+    fontWeight: '500',
   },
   mapContainer: {
     height: 350,
     marginHorizontal: 16,
     marginBottom: 12,
-    borderRadius: 14,
     overflow: 'hidden',
   },
   listContent: {
@@ -420,71 +510,33 @@ const styles = StyleSheet.create({
   listItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 10,
-    shadowColor: '#1D3557',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 2,
   },
   listDot: {
-    width: 12,
-    height: 12,
     borderRadius: 6,
-    marginRight: 14,
   },
   listItemContent: {
     flex: 1,
   },
-  listItemTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1C1C2E',
-    marginBottom: 3,
-  },
-  listItemAddress: {
-    fontSize: 13,
-    color: '#6C757D',
-    marginBottom: 8,
-  },
+  listItemTitle: {},
+  listItemAddress: {},
   listItemTags: {
     flexDirection: 'row',
-    gap: 8,
   },
   listItemTag: {
-    fontSize: 11,
-    color: '#1D3557',
-    backgroundColor: '#EDF2F7',
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 8,
     overflow: 'hidden',
   },
   emptyText: {
     fontSize: 16,
-    color: '#6C757D',
     textAlign: 'center',
     marginTop: 24,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(29, 53, 87, 0.6)',
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 22,
-    borderTopRightRadius: 22,
     padding: 24,
     maxHeight: '80%',
-    shadowColor: '#1D3557',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 8,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -495,23 +547,19 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#1C1C2E',
     flex: 1,
   },
   modalAddress: {
     fontSize: 14,
-    color: '#6C757D',
     marginBottom: 4,
   },
   modalBarrio: {
     fontSize: 14,
-    color: '#E76F51',
     fontWeight: '500',
     marginBottom: 14,
   },
   mapEmbedContainer: {
     marginBottom: 10,
-    borderRadius: 14,
     overflow: 'hidden',
   },
   mapEmbedLinks: {
@@ -526,11 +574,9 @@ const styles = StyleSheet.create({
   },
   mapEmbedLinkText: {
     fontSize: 13,
-    color: '#1D3557',
     fontWeight: '500',
   },
   modalInfo: {
-    gap: 14,
     marginBottom: 18,
   },
   modalInfoRow: {
@@ -540,51 +586,41 @@ const styles = StyleSheet.create({
   },
   modalInfoText: {
     fontSize: 14,
-    color: '#1C1C2E',
   },
   modalManager: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 10,
     borderTopWidth: 1,
-    borderTopColor: '#DEE2E6',
   },
   modalManagerLabel: {
-    color: '#6C757D',
     fontSize: 13,
   },
   modalManagerValue: {
     fontWeight: '600',
-    color: '#1C1C2E',
   },
   modalSource: {
     marginTop: 8,
     paddingVertical: 10,
     borderTopWidth: 1,
-    borderTopColor: '#DEE2E6',
     flexDirection: 'row',
     alignItems: 'center',
   },
   modalSourceLabel: {
-    color: '#6C757D',
     fontSize: 12,
   },
   modalSourceValue: {
     fontSize: 12,
-    color: '#1C1C2E',
   },
   directionsButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#1D3557',
-    borderRadius: 14,
     padding: 16,
     marginTop: 18,
     gap: 10,
   },
   directionsButtonText: {
-    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
   },
@@ -592,19 +628,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#E76F51',
-    borderRadius: 14,
     padding: 16,
     marginTop: 10,
     gap: 10,
-    shadowColor: '#E76F51',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
   },
   createMatchButtonText: {
-    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
   },
@@ -621,7 +649,6 @@ const styles = StyleSheet.create({
   },
   heroOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(29, 53, 87, 0.75)',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 24,
@@ -632,7 +659,6 @@ const styles = StyleSheet.create({
   heroTitle: {
     fontSize: 36,
     fontWeight: '800',
-    color: '#FFFFFF',
     marginBottom: 8,
     letterSpacing: -0.5,
     textShadowColor: 'rgba(0,0,0,0.3)',
@@ -641,7 +667,6 @@ const styles = StyleSheet.create({
   },
   heroSubtitle: {
     fontSize: 16,
-    color: 'rgba(255,255,255,0.9)',
     textAlign: 'center',
     maxWidth: 400,
   },
