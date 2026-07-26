@@ -79,7 +79,7 @@ function RootLayoutContent() {
 
 export default function RootLayout() {
   return (
-    <ThemeProvider defaultMode="system">
+    <ThemeProvider>
       <RootLayoutContent />
     </ThemeProvider>
   );

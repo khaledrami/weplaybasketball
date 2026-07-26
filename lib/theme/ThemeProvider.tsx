@@ -45,7 +45,7 @@ const ThemeContext = createContext<ThemeContextType>(null as any);
 
 const THEME_MODE_KEY = 'theme_mode';
 
-export function ThemeProvider({ children, defaultMode = 'system' }: { children: React.ReactNode; defaultMode?: ThemeMode }) {
+export function ThemeProvider({ children, defaultMode = 'light' }: { children: React.ReactNode; defaultMode?: ThemeMode }) {
   const systemColorScheme = useColorScheme();
   const [mode, setModeState] = useState<ThemeMode>(defaultMode);
   const [loaded, setLoaded] = useState(false);
