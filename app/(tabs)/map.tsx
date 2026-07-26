@@ -236,14 +236,23 @@ export default function MapScreen() {
                       <Text style={[styles.modalBarrio, { color: colors.secondary }]}>{selectedCourt.barrio}</Text>
                     )}
 
-                    <View style={[styles.mapEmbedContainer, { borderRadius: borderRadius.xl }]}>
-                      <iframe
-                        src={`https://www.openstreetmap.org/export/embed.html?bbox=${selectedCourt.lng - 0.005},${selectedCourt.lat - 0.003},${selectedCourt.lng + 0.005},${selectedCourt.lat + 0.003}&layer=mapnik&marker=${selectedCourt.lat},${selectedCourt.lng}`}
-                        style={{ width: '100%', height: 200, border: 'none', borderRadius: borderRadius.xl }}
-                        loading="lazy"
-                        title={`Mapa de ${selectedCourt.name}`}
-                      />
-                    </View>
+                    {Platform.OS === 'web' ? (
+                      <View style={[styles.mapEmbedContainer, { borderRadius: borderRadius.xl }]}>
+                        <iframe
+                          src={`https://www.openstreetmap.org/export/embed.html?bbox=${selectedCourt.lng - 0.005},${selectedCourt.lat - 0.003},${selectedCourt.lng + 0.005},${selectedCourt.lat + 0.003}&layer=mapnik&marker=${selectedCourt.lat},${selectedCourt.lng}`}
+                          style={{ width: '100%', height: 200, border: 'none', borderRadius: borderRadius.xl }}
+                          loading="lazy"
+                          title={`Mapa de ${selectedCourt.name}`}
+                        />
+                      </View>
+                    ) : (
+                      <View style={[styles.mapEmbedContainer, { borderRadius: borderRadius.xl, backgroundColor: colors.surfaceHover, padding: spacing[4], alignItems: 'center', justifyContent: 'center' }]}>
+                        <Ionicons name="map" size={40} color={colors.primary} />
+                        <Text style={{ color: colors.textSecondary, fontSize: typography.fontSizes.bodyMedium, marginTop: spacing[2] }}>
+                          Mapa disponible a web
+                        </Text>
+                      </View>
+                    )}
 
                     <View style={styles.mapEmbedLinks}>
                       <TouchableOpacity
