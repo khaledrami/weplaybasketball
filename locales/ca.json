@@ -44,7 +44,15 @@
     "sign_out": "Tancar sessió",
     "name_required": "El nom és obligatori",
     "updated": "Perfil actualitzat",
-    "language_selector": "Idioma de l'aplicació"
+    "language_selector": "Idioma de l'aplicació",
+    "help": "Ajuda",
+    "tour": "Com funciona?",
+    "theme": "Tema"
+  },
+  "theme": {
+    "light": "Clar",
+    "dark": "Fosc",
+    "system": "Automàtic"
   },
   "positions": {
     "base": "Base",

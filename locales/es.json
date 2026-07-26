@@ -44,7 +44,15 @@
     "sign_out": "Cerrar sesión",
     "name_required": "El nombre es obligatorio",
     "updated": "Perfil actualizado",
-    "language_selector": "Idioma de la aplicación"
+    "language_selector": "Idioma de la aplicación",
+    "help": "Ayuda",
+    "tour": "¿Cómo funciona?",
+    "theme": "Tema"
+  },
+  "theme": {
+    "light": "Claro",
+    "dark": "Oscuro",
+    "system": "Automático"
   },
   "positions": {
     "base": "Base",

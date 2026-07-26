@@ -2,14 +2,20 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
 import { Session } from '@supabase/supabase-js';
+import { ThemeProvider } from '../lib/theme';
+import { useFontLoader } from '../lib/theme/fonts';
+import { OnboardingModal } from '../components/OnboardingModal';
 
-export default function RootLayout() {
+function RootLayoutContent() {
   const router = useRouter();
   const segments = useSegments();
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const { fontsLoaded } = useFontLoader();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -25,7 +31,7 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if (loading) return;
+    if (loading || !fontsLoaded) return;
 
     const inAuthGroup = segments[0] === '(auth)';
 
@@ -34,9 +40,24 @@ export default function RootLayout() {
     } else if (session && inAuthGroup) {
       router.replace('/(tabs)/map');
     }
-  }, [session, segments, loading, router]);
+  }, [session, segments, loading, fontsLoaded, router]);
 
-  if (loading) {
+  useEffect(() => {
+    if (loading || !fontsLoaded || !session) return;
+
+    AsyncStorage.getItem('hasSeenOnboarding').then((value) => {
+      if (value !== 'true') {
+        setShowOnboarding(true);
+      }
+    });
+  }, [loading, fontsLoaded, session]);
+
+  const handleOnboardingComplete = async () => {
+    setShowOnboarding(false);
+    await AsyncStorage.setItem('hasSeenOnboarding', 'true');
+  };
+
+  if (loading || !fontsLoaded) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#E76F51" />
@@ -51,6 +72,15 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       </Stack>
+      <OnboardingModal visible={showOnboarding} onComplete={handleOnboardingComplete} />
     </>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <ThemeProvider defaultMode="system">
+      <RootLayoutContent />
+    </ThemeProvider>
   );
 }
