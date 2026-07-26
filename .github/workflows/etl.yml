@@ -1,0 +1,46 @@
+name: ETL — Sync Court Data
+
+on:
+  schedule:
+    # Weekly: Sunday 06:00 UTC (08:00 Barcelona time)
+    - cron: "0 6 * * 0"
+  workflow_dispatch:
+    inputs:
+      force_full_reinsert:
+        description: "Delete all ETL courts and re-insert"
+        type: boolean
+        default: true
+
+env:
+  EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+jobs:
+  etl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - run: npm install
+
+      - name: Run ETL pipeline
+        run: node --experimental-strip-types scripts/etl/run.ts
+
+      - name: Verify court count
+        run: |
+          node --experimental-strip-types -e "
+            import { createClient } from '@supabase/supabase-js';
+            const sb = createClient(process.env.EXPO_PUBLIC_SUPABASE_URL, process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY);
+            const { count } = await sb.from('courts').select('*', { count: 'exact', head: true });
+            console.log('Courts in DB: ' + count);
+            if (count < 30) {
+              console.error('ERROR: Court count too low (' + count + '). Aborting.');
+              process.exit(1);
+            }
+          "
