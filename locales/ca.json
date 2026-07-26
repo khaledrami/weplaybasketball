@@ -60,7 +60,8 @@
     "access_partial": "Parcial",
     "directions": "Com arribar",
     "details": "Detalls",
-    "community_verified": "Verificat per la comunitat"
+    "community_verified": "Verificat per la comunitat",
+    "no_courts": "No s'han trobat pistes"
   },
   "matches": {
     "title": "Partits",

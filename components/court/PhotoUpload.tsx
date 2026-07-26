@@ -16,6 +16,7 @@ import { uploadCourtPhoto, getCourtPhotos, deleteCourtPhoto, pickImage, takePhot
 interface Photo {
   id: string;
   photo_url: string;
+  storage_path: string;
   user_id: string;
   created_at: string;
 }
@@ -68,7 +69,7 @@ export default function PhotoUpload({ courtId, isOwner = false }: PhotoUploadPro
           text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
-            const success = await deleteCourtPhoto(photo.photo_url);
+            const success = await deleteCourtPhoto(photo.storage_path);
             if (success) {
               setPhotos(prev => prev.filter(p => p.id !== photo.id));
               setSelectedPhoto(null);

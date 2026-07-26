@@ -26,17 +26,10 @@
     },
     "plugins": [
       "expo-router",
-      "expo-status-bar",
-      "expo-localization",
-      [
-        "react-native-maps",
-        {
-          "locationAlwaysAndWhenInUsePermission": "Permetre a WePlayBasketball accedir a la vostra ubicació per mostrar pistes properes."
-        }
-      ]
+      "expo-localization"
     ],
     "experiments": {
-      "typedRoutes": true
+      "typedRoutes": false
     }
   }
 }

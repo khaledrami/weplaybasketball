@@ -205,15 +205,15 @@ export default function MatchDetailScreen() {
             <View key={player.id} style={styles.playerCard}>
               <View style={styles.playerAvatar}>
                 <Text style={styles.playerInitial}>
-                  {player.profile?.full_name?.charAt(0) || '?'}
+                  {player.profile?.display_name?.charAt(0) || '?'}
                 </Text>
               </View>
               <View style={styles.playerInfo}>
                 <Text style={styles.playerName}>
-                  {player.profile?.full_name || t('profile.anonymous')}
+                  {player.profile?.display_name || t('profile.anonymous')}
                 </Text>
-                {player.profile?.skill_level && (
-                  <Text style={styles.playerLevel}>{player.profile.skill_level}</Text>
+                {player.profile?.level && (
+                  <Text style={styles.playerLevel}>{player.profile.level}</Text>
                 )}
               </View>
               {player.user_id === match.creator_id && (

@@ -60,7 +60,7 @@ export async function deleteCourtPhoto(storagePath: string): Promise<boolean> {
   return true;
 }
 
-export async function getCourtPhotos(courtId: string): Promise<{ id: string; photo_url: string; user_id: string; created_at: string }[]> {
+export async function getCourtPhotos(courtId: string): Promise<{ id: string; photo_url: string; storage_path: string; user_id: string; created_at: string }[]> {
   const { data, error } = await supabase
     .from('court_photos')
     .select('*')

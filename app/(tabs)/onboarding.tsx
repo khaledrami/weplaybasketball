@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -40,13 +40,13 @@ export default function OnboardingScreen() {
     dominant_hand: '' as DominantHand | '',
   });
 
-  useState(() => {
+  useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUserId(session.user.id);
       }
     });
-  });
+  }, []);
 
   const handleComplete = async () => {
     if (!formData.display_name.trim()) {

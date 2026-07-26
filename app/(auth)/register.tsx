@@ -7,7 +7,6 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from 'react-native';
 import { Link } from 'expo-router';
 import { useAuth } from '../../lib/auth';
@@ -15,30 +14,43 @@ import { useTranslation } from '../../lib/i18n';
 
 export default function RegisterScreen() {
   const { t } = useTranslation();
-  const { signUpWithEmail, loading, error } = useAuth();
+  const { signUpWithEmail, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const handleRegister = async () => {
+    setErrorMsg(null);
+    setSuccessMsg(null);
     if (!email || !password || !confirmPassword) {
-      Alert.alert(t('common.error'), 'Omple tots els camps');
+      setErrorMsg('Omple tots els camps');
       return;
     }
     if (password !== confirmPassword) {
-      Alert.alert(t('common.error'), 'Les contrasenyes no coincideixen');
+      setErrorMsg('Les contrasenyes no coincideixen');
       return;
     }
     if (password.length < 6) {
-      Alert.alert(t('common.error'), 'La contrasenya ha de tenir almenys 6 caràcters');
+      setErrorMsg('La contrasenya ha de tenir almenys 6 caràcters');
       return;
     }
-    const success = await signUpWithEmail(email, password);
-    if (success) {
-      Alert.alert('Compte creat', 'Revisa el teu correu per confirmar el compte');
-    } else if (error) {
-      Alert.alert(t('common.error'), error);
+    try {
+      const error = await signUpWithEmail(email, password);
+      if (error) {
+        setErrorMsg(error);
+      } else {
+        setSuccessMsg('Revisa el teu correu per confirmar el compte');
+      }
+    } catch (e: any) {
+      setErrorMsg(e?.message ?? 'Error inesperat');
     }
+  };
+
+  const clearMessages = () => {
+    setErrorMsg(null);
+    setSuccessMsg(null);
   };
 
   return (
@@ -49,31 +61,47 @@ export default function RegisterScreen() {
       <View style={styles.content}>
         <Text style={styles.title}>{t('auth.register')}</Text>
 
+        {errorMsg ? (
+          <View style={styles.errorBox}>
+            <Text style={styles.errorText}>{errorMsg}</Text>
+          </View>
+        ) : null}
+
+        {successMsg ? (
+          <View style={styles.successBox}>
+            <Text style={styles.successText}>{successMsg}</Text>
+          </View>
+        ) : null}
+
         <View style={styles.form}>
           <TextInput
             style={styles.input}
             placeholder={t('auth.email')}
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(text) => { setEmail(text); clearMessages(); }}
             autoCapitalize="none"
             keyboardType="email-address"
             autoComplete="email"
+            returnKeyType="next"
           />
           <TextInput
             style={styles.input}
             placeholder={t('auth.password')}
             value={password}
-            onChangeText={setPassword}
+            onChangeText={(text) => { setPassword(text); clearMessages(); }}
             secureTextEntry
             autoComplete="new-password"
+            returnKeyType="next"
           />
           <TextInput
             style={styles.input}
             placeholder="Confirmar contrasenya"
             value={confirmPassword}
-            onChangeText={setConfirmPassword}
+            onChangeText={(text) => { setConfirmPassword(text); clearMessages(); }}
             secureTextEntry
             autoComplete="new-password"
+            returnKeyType="done"
+            onSubmitEditing={handleRegister}
           />
 
           <TouchableOpacity
@@ -113,6 +141,32 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 32,
     color: '#000000',
+  },
+  errorBox: {
+    backgroundColor: '#FFF2F2',
+    borderWidth: 1,
+    borderColor: '#FF3B30',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 16,
+  },
+  errorText: {
+    color: '#FF3B30',
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  successBox: {
+    backgroundColor: '#F0FFF0',
+    borderWidth: 1,
+    borderColor: '#34C759',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 16,
+  },
+  successText: {
+    color: '#34C759',
+    fontSize: 14,
+    textAlign: 'center',
   },
   form: {
     gap: 12,

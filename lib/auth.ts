@@ -4,7 +4,6 @@ import { User } from '@supabase/supabase-js';
 
 export function useAuth() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -19,22 +18,28 @@ export function useAuth() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signInWithEmail = async (email: string, password: string) => {
+  const signInWithEmail = async (email: string, password: string): Promise<string | null> => {
     setLoading(true);
-    setError(null);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) setError(error.message);
-    setLoading(false);
-    return !error;
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      return error?.message ?? null;
+    } catch (e: any) {
+      return e?.message ?? 'Error de connexió';
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const signUpWithEmail = async (email: string, password: string) => {
+  const signUpWithEmail = async (email: string, password: string): Promise<string | null> => {
     setLoading(true);
-    setError(null);
-    const { error } = await supabase.auth.signUp({ email, password });
-    if (error) setError(error.message);
-    setLoading(false);
-    return !error;
+    try {
+      const { error } = await supabase.auth.signUp({ email, password });
+      return error?.message ?? null;
+    } catch (e: any) {
+      return e?.message ?? 'Error de connexió';
+    } finally {
+      setLoading(false);
+    }
   };
 
   const signOut = async () => {
@@ -47,6 +52,5 @@ export function useAuth() {
     signUpWithEmail,
     signOut,
     loading,
-    error,
   };
 }

@@ -1,21 +1,42 @@
-import { useRef, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, TextInput, TouchableOpacity, FlatList, Modal } from 'react-native';
-import MapView, { Marker, Callout } from 'react-native-maps';
 import { useTranslation } from '../../lib/i18n';
 import { fetchCourts, getCourtMarkerColor } from '../../lib/courts';
 import { Court } from '../../lib/types';
 import { Ionicons } from '@expo/vector-icons';
 
-const BADALONA_REGION = {
-  latitude: 41.4418,
-  longitude: 2.2310,
-  latitudeDelta: 0.02,
-  longitudeDelta: 0.02,
+const COURT_TYPE_LABELS: Record<string, string> = {
+  outdoor: 'Exterior',
+  indoor: 'Interior',
+  covered: 'Cobert',
 };
+
+const ACCESS_LABELS: Record<string, string> = {
+  lliure: 'map.access_free',
+  restringit: 'map.access_restricted',
+  parcial: 'map.access_partial',
+};
+
+function CourtListItem({ court, onPress, t }: { court: Court; onPress: () => void; t: (key: string) => string }) {
+  return (
+    <TouchableOpacity style={styles.listItem} onPress={onPress}>
+      <View style={[styles.listDot, { backgroundColor: getCourtMarkerColor(court.access_type) }]} />
+      <View style={styles.listItemContent}>
+        <Text style={styles.listItemTitle}>{court.name}</Text>
+        <Text style={styles.listItemAddress}>{court.address}{court.barrio ? ` · ${court.barrio}` : ''}</Text>
+        <View style={styles.listItemTags}>
+          <Text style={styles.listItemTag}>{t(ACCESS_LABELS[court.access_type] ?? 'map.access_free')}</Text>
+          <Text style={styles.listItemTag}>{court.hoops} cistelles</Text>
+          <Text style={styles.listItemTag}>{COURT_TYPE_LABELS[court.court_type ?? 'outdoor'] ?? court.court_type}</Text>
+        </View>
+      </View>
+      <Ionicons name="chevron-forward" size={18} color="#C7C7CC" />
+    </TouchableOpacity>
+  );
+}
 
 export default function MapScreen() {
   const { t } = useTranslation();
-  const mapRef = useRef<MapView>(null);
   const [courts, setCourts] = useState<Court[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -49,11 +70,6 @@ export default function MapScreen() {
     setShowCourtModal(true);
   };
 
-  const openInMaps = (court: Court) => {
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${court.lat},${court.lng}`;
-    // Linking.openURL(url); // Will add later
-  };
-
   if (loading) {
     return (
       <View style={styles.centered}>
@@ -81,7 +97,7 @@ export default function MapScreen() {
         </View>
       </View>
 
-      <View style={styles.filterContainer}>
+      <View style={styles.filterRow}>
         <TouchableOpacity
           style={[styles.filterButton, selectedFilter === null && styles.filterActive]}
           onPress={() => setSelectedFilter(null)}
@@ -116,46 +132,19 @@ export default function MapScreen() {
         </TouchableOpacity>
       </View>
 
-      <MapView
-        ref={mapRef}
-        style={styles.map}
-        initialRegion={BADALONA_REGION}
-        showsUserLocation={true}
-        showsMyLocationButton={true}
-      >
-        {filteredCourts.map((court) => (
-          <Marker
-            key={court.id}
-            coordinate={{ latitude: court.lat, longitude: court.lng }}
-            pinColor={getCourtMarkerColor(court.access_type)}
-          >
-            <Callout onPress={() => handleCourtPress(court)}>
-              <View style={styles.callout}>
-                <Text style={styles.calloutTitle}>{court.name}</Text>
-                <Text style={styles.calloutAddress}>{court.address}</Text>
-                <Text style={styles.calloutType}>
-                  {t(`map.access_${court.access_type === 'lliure' ? 'free' : court.access_type === 'restringit' ? 'restricted' : 'partial'}`)}
-                </Text>
-              </View>
-            </Callout>
-          </Marker>
-        ))}
-      </MapView>
-
-      <View style={styles.legend}>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: '#34C759' }]} />
-          <Text style={styles.legendText}>{t('map.access_free')}</Text>
-        </View>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: '#FF3B30' }]} />
-          <Text style={styles.legendText}>{t('map.access_restricted')}</Text>
-        </View>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: '#FF9500' }]} />
-          <Text style={styles.legendText}>{t('map.access_partial')}</Text>
-        </View>
-      </View>
+      <FlatList
+        data={filteredCourts}
+        keyExtractor={(item) => String(item.id)}
+        contentContainerStyle={styles.listContent}
+        renderItem={({ item }) => (
+          <CourtListItem court={item} onPress={() => handleCourtPress(item)} t={t} />
+        )}
+        ListEmptyComponent={
+          <View style={styles.centered}>
+            <Text style={styles.emptyText}>{t('map.no_courts')}</Text>
+          </View>
+        }
+      />
 
       <Modal
         visible={showCourtModal}
@@ -227,14 +216,6 @@ export default function MapScreen() {
                   <Text style={styles.modalSourceLabel}>Font:</Text>
                   <Text style={styles.modalSourceValue}>{selectedCourt.source}</Text>
                 </View>
-
-                <TouchableOpacity
-                  style={styles.directionsButton}
-                  onPress={() => openInMaps(selectedCourt)}
-                >
-                  <Ionicons name="navigate" size={20} color="#FFFFFF" />
-                  <Text style={styles.directionsButtonText}>{t('map.directions')}</Text>
-                </TouchableOpacity>
               </>
             )}
           </View>
@@ -247,6 +228,7 @@ export default function MapScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F2F2F7',
   },
   centered: {
     flex: 1,
@@ -254,11 +236,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   searchContainer: {
-    position: 'absolute',
-    top: 50,
-    left: 16,
-    right: 16,
-    zIndex: 100,
+    padding: 16,
+    paddingBottom: 8,
   },
   searchBox: {
     flexDirection: 'row',
@@ -267,24 +246,16 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 12,
     height: 48,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
   searchInput: {
     flex: 1,
     marginLeft: 8,
     fontSize: 16,
   },
-  filterContainer: {
-    position: 'absolute',
-    top: 110,
-    left: 16,
-    right: 16,
-    zIndex: 100,
+  filterRow: {
     flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
     gap: 8,
   },
   filterButton: {
@@ -292,11 +263,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
   },
   filterActive: {
     backgroundColor: '#007AFF',
@@ -318,56 +284,55 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '600',
   },
-  map: {
-    flex: 1,
+  listContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 24,
   },
-  callout: {
-    padding: 8,
-    minWidth: 150,
-  },
-  calloutTitle: {
-    fontWeight: 'bold',
-    fontSize: 14,
-    marginBottom: 4,
-  },
-  calloutAddress: {
-    fontSize: 12,
-    color: '#8E8E93',
-    marginBottom: 4,
-  },
-  calloutType: {
-    fontSize: 12,
-    color: '#007AFF',
-    fontWeight: '500',
-  },
-  legend: {
-    position: 'absolute',
-    bottom: 20,
-    left: 16,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 12,
-    flexDirection: 'row',
-    gap: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  legendItem: {
+  listItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 8,
   },
-  legendDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+  listDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 12,
   },
-  legendText: {
-    fontSize: 11,
+  listItemContent: {
+    flex: 1,
+  },
+  listItemTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  listItemAddress: {
+    fontSize: 13,
     color: '#8E8E93',
+    marginBottom: 6,
+  },
+  listItemTags: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  listItemTag: {
+    fontSize: 11,
+    color: '#007AFF',
+    backgroundColor: '#F2F2F7',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#8E8E93',
+    textAlign: 'center',
+    marginTop: 40,
   },
   modalOverlay: {
     flex: 1,
@@ -440,20 +405,5 @@ const styles = StyleSheet.create({
   modalSourceValue: {
     fontSize: 12,
     color: '#000000',
-  },
-  directionsButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
-    height: 48,
-    marginTop: 16,
-  },
-  directionsButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
   },
 });

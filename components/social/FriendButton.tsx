@@ -19,6 +19,7 @@ interface FriendButtonProps {
 export default function FriendButton({ userId, onStatusChange }: FriendButtonProps) {
   const { t } = useTranslation();
   const [status, setStatus] = useState<FriendshipStatus | null>(null);
+  const [friendshipId, setFriendshipId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -26,31 +27,29 @@ export default function FriendButton({ userId, onStatusChange }: FriendButtonPro
   }, [userId]);
 
   const loadStatus = async () => {
-    const friendStatus = await getFriendshipStatus(userId);
-    setStatus(friendStatus);
+    const result = await getFriendshipStatus(userId);
+    setStatus(result?.status ?? null);
+    setFriendshipId(result?.friendshipId ?? null);
   };
 
   const handlePress = async () => {
     setLoading(true);
 
     if (!status) {
-      // Send friend request
       const success = await sendFriendRequest(userId);
       if (success) {
-        setStatus('pending');
+        await loadStatus();
         onStatusChange?.();
       } else {
         Alert.alert(t('common.error'), t('social.requestError'));
       }
-    } else if (status === 'pending') {
-      // Accept friend request
-      const success = await acceptFriendRequest(userId);
+    } else if (status === 'pending' && friendshipId) {
+      const success = await acceptFriendRequest(friendshipId);
       if (success) {
-        setStatus('accepted');
+        await loadStatus();
         onStatusChange?.();
       }
-    } else if (status === 'accepted') {
-      // Remove friend
+    } else if (status === 'accepted' && friendshipId) {
       Alert.alert(
         t('social.removeFriendTitle'),
         t('social.removeFriendMessage'),
@@ -60,9 +59,10 @@ export default function FriendButton({ userId, onStatusChange }: FriendButtonPro
             text: t('social.remove'),
             style: 'destructive',
             onPress: async () => {
-              const success = await removeFriend(userId);
+              const success = await removeFriend(friendshipId);
               if (success) {
                 setStatus(null);
+                setFriendshipId(null);
                 onStatusChange?.();
               }
             },

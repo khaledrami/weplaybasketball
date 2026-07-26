@@ -7,7 +7,6 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from 'react-native';
 import { Link } from 'expo-router';
 import { useAuth } from '../../lib/auth';
@@ -15,18 +14,24 @@ import { useTranslation } from '../../lib/i18n';
 
 export default function LoginScreen() {
   const { t } = useTranslation();
-  const { signInWithEmail, loading, error } = useAuth();
+  const { signInWithEmail, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleLogin = async () => {
+    setErrorMsg(null);
     if (!email || !password) {
-      Alert.alert(t('common.error'), 'Omple tots els camps');
+      setErrorMsg('Omple tots els camps');
       return;
     }
-    const success = await signInWithEmail(email, password);
-    if (!success && error) {
-      Alert.alert(t('common.error'), error);
+    try {
+      const error = await signInWithEmail(email, password);
+      if (error) {
+        setErrorMsg(error);
+      }
+    } catch (e: any) {
+      setErrorMsg(e?.message ?? 'Error inesperat');
     }
   };
 
@@ -39,23 +44,32 @@ export default function LoginScreen() {
         <Text style={styles.title}>{t('app_name')}</Text>
         <Text style={styles.subtitle}>{t('auth.login')}</Text>
 
+        {errorMsg ? (
+          <View style={styles.errorBox}>
+            <Text style={styles.errorText}>{errorMsg}</Text>
+          </View>
+        ) : null}
+
         <View style={styles.form}>
           <TextInput
             style={styles.input}
             placeholder={t('auth.email')}
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(text) => { setEmail(text); setErrorMsg(null); }}
             autoCapitalize="none"
             keyboardType="email-address"
             autoComplete="email"
+            returnKeyType="next"
           />
           <TextInput
             style={styles.input}
             placeholder={t('auth.password')}
             value={password}
-            onChangeText={setPassword}
+            onChangeText={(text) => { setPassword(text); setErrorMsg(null); }}
             secureTextEntry
             autoComplete="password"
+            returnKeyType="done"
+            onSubmitEditing={handleLogin}
           />
 
           <TouchableOpacity
@@ -109,6 +123,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 32,
     color: '#8E8E93',
+  },
+  errorBox: {
+    backgroundColor: '#FFF2F2',
+    borderWidth: 1,
+    borderColor: '#FF3B30',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 16,
+  },
+  errorText: {
+    color: '#FF3B30',
+    fontSize: 14,
+    textAlign: 'center',
   },
   form: {
     gap: 12,

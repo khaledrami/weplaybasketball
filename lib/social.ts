@@ -83,9 +83,10 @@ export async function getFriendships(): Promise<(Friendship & { friend: Profile 
     .from('friendships')
     .select(`
       *,
-      friend:profiles!friendships_addressee_id_fkey(*)
+      requester:profiles!friendships_requester_id_fkey(*),
+      addressee:profiles!friendships_addressee_id_fkey(*)
     `)
-    .eq('requester_id', user.id)
+    .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
     .eq('status', 'accepted');
 
   if (error) {
@@ -93,7 +94,10 @@ export async function getFriendships(): Promise<(Friendship & { friend: Profile 
     return [];
   }
 
-  return data || [];
+  return (data || []).map((f) => ({
+    ...f,
+    friend: f.requester_id === user.id ? f.addressee : f.requester,
+  })) as (Friendship & { friend: Profile })[];
 }
 
 export async function getPendingRequests(): Promise<(Friendship & { requester: Profile })[]> {
@@ -117,18 +121,18 @@ export async function getPendingRequests(): Promise<(Friendship & { requester: P
   return data || [];
 }
 
-export async function getFriendshipStatus(userId: string): Promise<FriendshipStatus | null> {
+export async function getFriendshipStatus(userId: string): Promise<{ status: FriendshipStatus; friendshipId: string } | null> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
   const { data } = await supabase
     .from('friendships')
-    .select('status')
-    .or(`requester_id.eq.${user.id},addressee_id.eq.${userId}`)
-    .or(`requester_id.eq.${userId},addressee_id.eq.${user.id}`)
+    .select('id, status')
+    .or(`and(requester_id.eq.${user.id},addressee_id.eq.${userId}),and(requester_id.eq.${userId},addressee_id.eq.${user.id})`)
     .single();
 
-  return data?.status || null;
+  if (!data) return null;
+  return { status: data.status, friendshipId: data.id };
 }
 
 export async function searchPlayers(query: string): Promise<Profile[]> {

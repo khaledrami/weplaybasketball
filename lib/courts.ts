@@ -1,6 +1,5 @@
 import { supabase } from './supabase';
 import { Court } from './types';
-import { encodeGeohash } from './geohash';
 
 export async function fetchCourts(): Promise<Court[]> {
   const { data, error } = await supabase
