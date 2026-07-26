@@ -20,7 +20,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { COURT_TYPE_KEYS } from '../../lib/constants';
 import PhotoUpload from '../../components/court/PhotoUpload';
 import WebMapView from '../../components/WebMapView';
-import { HeroIllustration } from '../../components/ui/Illustrations';
 
 export default function MapScreen() {
   const { t } = useTranslation();
@@ -78,14 +77,10 @@ export default function MapScreen() {
           >
             {/* Hero banner */}
             <View style={styles.heroBanner}>
-              <View style={[styles.heroImage, { backgroundColor: '#4DB8E8', overflow: 'hidden' }]}>
-                <HeroIllustration size={300} />
-                <View style={[styles.heroOverlay, { backgroundColor: colors.overlayStrong }]}>
-                  <View style={styles.heroContent}>
-                    <Text style={[styles.heroTitle, { color: colors.textOnPrimary }]}>{t('app_name')}</Text>
-                    <Text style={[styles.heroSubtitle, { color: colors.textOnPrimary }]}>{t('map.hero_subtitle')}</Text>
-                  </View>
-                </View>
+              <View style={[styles.heroImage, { backgroundColor: '#4DB8E8', overflow: 'hidden', justifyContent: 'center', alignItems: 'center' }]}>
+                <Text style={{ fontSize: 60 }}>🏀</Text>
+                <Text style={{ fontSize: 20, color: '#FFFFFF', fontWeight: 'bold', marginTop: 8 }}>WePlayBasketball</Text>
+                <Text style={{ fontSize: 14, color: 'rgba(255,255,255,0.9)', textAlign: 'center', maxWidth: 400, marginTop: 4 }}>{t('map.hero_subtitle')}</Text>
               </View>
             </View>
 
