@@ -101,10 +101,6 @@ export function ThemeProvider({ children, defaultMode = 'light' }: { children: R
     [mode, resolvedMode, themeColors, courtColors, matchColors, setMode]
   );
 
-  if (!loaded) {
-    return null;
-  }
-
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
