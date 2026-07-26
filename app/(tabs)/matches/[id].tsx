@@ -15,6 +15,8 @@ import { fetchMatchById, joinMatch, leaveMatch, cancelMatch } from '../../../lib
 import { Match, Court, Profile } from '../../../lib/types';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
+import AutoTeamButton from '../../../components/match/AutoTeamButton';
+import RatingFlow from '../../../components/rating/RatingFlow';
 
 type MatchWithDetails = Match & {
   court: Court;
@@ -29,6 +31,7 @@ export default function MatchDetailScreen() {
   const [match, setMatch] = useState<MatchWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState(false);
+  const [showRatingFlow, setShowRatingFlow] = useState(false);
 
   useEffect(() => {
     if (id) loadMatch();
@@ -232,6 +235,29 @@ export default function MatchDetailScreen() {
           <Text style={styles.noPlayers}>{t('matches.noPlayers')}</Text>
         )}
       </View>
+
+      {showRatingFlow && match && (
+        <RatingFlow
+          matchId={match.id}
+          onComplete={() => { setShowRatingFlow(false); loadMatch(); }}
+          onSkip={() => setShowRatingFlow(false)}
+        />
+      )}
+
+      {isCreator && match.status === 'in_progress' && (
+        <AutoTeamButton
+          matchId={match.id}
+          playerCount={match.current_players}
+          onTeamsCreated={loadMatch}
+        />
+      )}
+
+      {isPlayer && match.status === 'completed' && !showRatingFlow && (
+        <TouchableOpacity style={styles.rateButton} onPress={() => setShowRatingFlow(true)}>
+          <Ionicons name="star" size={20} color="#FFFFFF" />
+          <Text style={styles.rateButtonText}>{t('rating.title')}</Text>
+        </TouchableOpacity>
+      )}
 
       <View style={styles.actions}>
         {!isPlayer && !isFull && (
@@ -486,6 +512,21 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     color: '#FF3B30',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  rateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    height: 52,
+    borderRadius: 12,
+    backgroundColor: '#FF9500',
+    marginBottom: 12,
+  },
+  rateButtonText: {
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },

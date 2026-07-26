@@ -5,6 +5,7 @@ import { fetchCourts, getCourtMarkerColor } from '../../lib/courts';
 import { Court } from '../../lib/types';
 import { Ionicons } from '@expo/vector-icons';
 import WebMapView from '../../components/WebMapView';
+import PhotoUpload from '../../components/court/PhotoUpload';
 
 const COURT_TYPE_LABELS: Record<string, string> = {
   outdoor: 'Exterior',
@@ -242,6 +243,8 @@ export default function MapScreen() {
                   <Text style={styles.modalSourceLabel}>Font:</Text>
                   <Text style={styles.modalSourceValue}>{selectedCourt.source}</Text>
                 </View>
+
+                <PhotoUpload courtId={selectedCourt.id} />
               </>
             )}
           </View>
