@@ -91,7 +91,8 @@
     "verified_data": "Dato verificado",
     "approx_data": "Dato aproximado",
     "open_in_map": "Abrir en mapa",
-    "street_view": "Street View"
+    "street_view": "Street View",
+    "loading": "Cargando mapa..."
   },
   "matches": {
     "title": "Partidos",

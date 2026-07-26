@@ -91,7 +91,8 @@
     "verified_data": "Dada verificada",
     "approx_data": "Dada aproximada",
     "open_in_map": "Obrir al mapa",
-    "street_view": "Street View"
+    "street_view": "Street View",
+    "loading": "Carregant mapa..."
   },
   "matches": {
     "title": "Partits",

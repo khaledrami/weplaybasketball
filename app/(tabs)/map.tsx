@@ -105,6 +105,7 @@ export default function MapScreen() {
             <WebMapView
               courts={filteredCourts}
               onPress={handleCourtPress}
+              t={t}
             />
           </View>
 
@@ -303,7 +304,7 @@ function CourtListItem({ court, onPress, t }: { court: Court; onPress: () => voi
   );
 }
 
-function WebMapView({ courts, onPress }: { courts: Court[]; onPress: (court: Court) => void }) {
+function WebMapView({ courts, onPress, t }: { courts: Court[]; onPress: (court: Court) => void; t: any }) {
   return (
     <View style={styles.mapContainer}>
       <View style={styles.centered}>
