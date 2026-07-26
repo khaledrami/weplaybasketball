@@ -77,7 +77,7 @@ export default function FriendButton({ userId, onStatusChange }: FriendButtonPro
   if (loading) {
     return (
       <TouchableOpacity style={styles.button} disabled>
-        <ActivityIndicator size="small" color="#007AFF" />
+        <ActivityIndicator size="small" color="#E76F51" />
       </TouchableOpacity>
     );
   }
@@ -112,7 +112,7 @@ export default function FriendButton({ userId, onStatusChange }: FriendButtonPro
 
   return (
     <TouchableOpacity style={[styles.button, config.style]} onPress={handlePress}>
-      <Ionicons name={config.icon} size={20} color={config.style === styles.addButton ? '#007AFF' : '#FFFFFF'} />
+      <Ionicons name={config.icon} size={20} color={config.style === styles.addButton ? '#E76F51' : '#FFFFFF'} />
       <Text style={[styles.buttonText, config.textStyle]}>{config.text}</Text>
     </TouchableOpacity>
   );
@@ -128,26 +128,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
+    borderColor: '#DEE2E6',
   },
   addButton: {
     backgroundColor: '#FFFFFF',
-    borderColor: '#007AFF',
+    borderColor: '#E76F51',
   },
   friendsButton: {
-    backgroundColor: '#34C759',
-    borderColor: '#34C759',
+    backgroundColor: '#2D9CDB',
+    borderColor: '#2D9CDB',
   },
   pendingButton: {
-    backgroundColor: '#FF9500',
-    borderColor: '#FF9500',
+    backgroundColor: '#F4A261',
+    borderColor: '#F4A261',
   },
   buttonText: {
     fontSize: 14,
     fontWeight: '500',
   },
   addText: {
-    color: '#007AFF',
+    color: '#E76F51',
   },
   friendsText: {
     color: '#FFFFFF',
