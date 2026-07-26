@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { View, Text, Platform } from 'react-native';
 import { Court } from '../lib/types';
 import { getCourtMarkerColor } from '../lib/courts';
 
@@ -9,7 +10,16 @@ interface WebMapViewProps {
 
 const BADALONA_CENTER: [number, number] = [41.4418, 2.2318];
 
-export default function WebMapView({ courts, onCourtPress }: WebMapViewProps) {
+function NativeMapPlaceholder() {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#EDF2F7' }}>
+      <Text style={{ fontSize: 40 }}>🗺️</Text>
+      <Text style={{ marginTop: 8, color: '#6C757D', fontSize: 14 }}>Mapa disponible a web</Text>
+    </View>
+  );
+}
+
+function WebMapImpl({ courts, onCourtPress }: WebMapViewProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
 
@@ -17,57 +27,70 @@ export default function WebMapView({ courts, onCourtPress }: WebMapViewProps) {
     if (!mapRef.current || mapInstanceRef.current) return;
 
     const loadLeaflet = async () => {
-      if (!(window as any).L) {
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-        document.head.appendChild(link);
+      try {
+        if (!(window as any).L) {
+          const link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+          document.head.appendChild(link);
 
-        const script = document.createElement('script');
-        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-        document.head.appendChild(script);
-        await new Promise<void>((resolve) => { script.onload = () => resolve(); });
-      }
+          const script = document.createElement('script');
+          script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+          document.head.appendChild(script);
+          await new Promise<void>((resolve, reject) => {
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error('Failed to load Leaflet'));
+          });
+        }
 
-      const L = (window as any).L;
-      const map = L.map(mapRef.current, {
-        center: BADALONA_CENTER,
-        zoom: 13,
-        zoomControl: true,
-      });
+        const L = (window as any).L;
+        if (!L || !mapRef.current) return;
 
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        maxZoom: 19,
-      }).addTo(map);
-
-      courts.forEach((court) => {
-        const color = getCourtMarkerColor(court.access_type);
-        const icon = L.divIcon({
-          className: 'court-marker',
-          html: `<div style="
-            width: 24px; height: 24px;
-            background: ${color};
-            border: 2px solid white;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-          "></div>`,
-          iconSize: [24, 24],
-          iconAnchor: [12, 12],
+        const map = L.map(mapRef.current, {
+          center: BADALONA_CENTER,
+          zoom: 13,
+          zoomControl: true,
         });
 
-        const marker = L.marker([court.lat, court.lng], { icon }).addTo(map);
-        marker.on('click', () => onCourtPress(court));
-      });
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+          maxZoom: 19,
+        }).addTo(map);
 
-      mapInstanceRef.current = map;
+        courts.forEach((court) => {
+          const color = getCourtMarkerColor(court.access_type);
+          const icon = L.divIcon({
+            className: 'court-marker',
+            html: `<div style="
+              width: 24px; height: 24px;
+              background: ${color};
+              border: 2px solid white;
+              border-radius: 50%;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            "></div>`,
+            iconSize: [24, 24],
+            iconAnchor: [12, 12],
+          });
+
+          const marker = L.marker([court.lat, court.lng], { icon }).addTo(map);
+          marker.on('click', () => onCourtPress(court));
+        });
+
+        mapInstanceRef.current = map;
+      } catch (err) {
+        console.error('Leaflet loading error:', err);
+      }
     };
 
     loadLeaflet();
 
     return () => {
       if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
+        try {
+          mapInstanceRef.current.remove();
+        } catch (e) {
+          // ignore
+        }
         mapInstanceRef.current = null;
       }
     };
@@ -85,4 +108,11 @@ export default function WebMapView({ courts, onCourtPress }: WebMapViewProps) {
       }}
     />
   );
+}
+
+export default function WebMapView(props: WebMapViewProps) {
+  if (Platform.OS !== 'web') {
+    return <NativeMapPlaceholder />;
+  }
+  return <WebMapImpl {...props} />;
 }
