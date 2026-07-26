@@ -19,6 +19,7 @@ import { Court } from '../../lib/types';
 import { Ionicons } from '@expo/vector-icons';
 import { COURT_TYPE_KEYS } from '../../lib/constants';
 import { PhotoUpload } from '../../components/court/PhotoUpload';
+import WebMapView from '../../components/WebMapView';
 
 export default function MapScreen() {
   const { t } = useTranslation();
