@@ -23,7 +23,7 @@ export async function createMatch(matchData: {
       duration_minutes: matchData.duration_minutes || 60,
       max_players: matchData.max_players || 10,
       current_players: 1,
-      level_required: matchData.level_required || 'any',
+      level_required: matchData.level_required && matchData.level_required !== 'any' ? matchData.level_required : null,
       language: matchData.language || 'ca',
       is_mixed: matchData.is_mixed ?? true,
       description: matchData.description,
