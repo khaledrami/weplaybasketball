@@ -66,7 +66,7 @@ export default function MatchesScreen() {
         </View>
         <View style={styles.matchInfo}>
           <Text style={styles.matchName}>{item.court.name}</Text>
-          <Text style={styles.matchAddress}>{item.court.address}</Text>
+          <Text style={styles.matchAddress}>{item.court.address || 'Badalona'}</Text>
           <Text style={styles.matchTime}>
             {format(new Date(item.scheduled_at), 'HH:mm')} • {item.duration_minutes}min
           </Text>

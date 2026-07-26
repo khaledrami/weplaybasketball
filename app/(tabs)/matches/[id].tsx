@@ -138,7 +138,7 @@ export default function MatchDetailScreen() {
           <Ionicons name="location" size={24} color="#007AFF" />
           <Text style={styles.courtName}>{match.court.name}</Text>
         </View>
-        <Text style={styles.courtAddress}>{match.court.address}</Text>
+        <Text style={styles.courtAddress}>{match.court.address || 'Badalona'}</Text>
         {match.court.barrio && (
           <Text style={styles.courtBarrio}>{match.court.barrio}</Text>
         )}

@@ -54,7 +54,7 @@ export default function CourtMapView({
             <Callout onPress={() => onCourtPress(court)}>
               <View style={styles.callout}>
                 <Text style={styles.calloutTitle}>{court.name}</Text>
-                <Text style={styles.calloutAddress}>{court.address}</Text>
+                <Text style={styles.calloutAddress}>{court.address || court.barrio || 'Badalona'}</Text>
                 <Text style={styles.calloutType}>
                   {t(ACCESS_LABELS[court.access_type] ?? 'map.access_free')}
                 </Text>

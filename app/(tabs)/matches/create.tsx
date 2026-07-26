@@ -261,7 +261,7 @@ export default function CreateMatchScreen() {
                 >
                   <View style={styles.courtItemContent}>
                     <Text style={styles.courtItemName}>{item.name}</Text>
-                    <Text style={styles.courtItemAddress}>{item.address}</Text>
+                    <Text style={styles.courtItemAddress}>{item.address || 'Badalona'}</Text>
                   </View>
                   <View style={[styles.courtItemType, { backgroundColor: item.access_type === 'lliure' ? '#34C759' : item.access_type === 'restringit' ? '#FF3B30' : '#FF9500' }]}>
                     <Text style={styles.courtItemTypeText}>

@@ -30,15 +30,16 @@ export interface Profile {
 export interface Court {
   id: string;
   name: string;
-  address: string;
+  address?: string;
   barrio?: string;
   lat: number;
   lng: number;
   geohash: string;
   access_type: AccessType;
   court_type?: CourtType;
-  hoops: number;
+  hoops?: number;
   surface?: string;
+  surface_condition?: string;
   has_lighting?: boolean;
   has_nets?: boolean;
   is_accessible?: boolean;
@@ -48,10 +49,12 @@ export interface Court {
   phone?: string;
   email?: string;
   website?: string;
-  photo_urls: string[];
+  photo_urls?: string[];
   opening_hours?: string;
   source: string;
+  source_id?: string;
   confidence: 'high' | 'medium' | 'low';
+  last_updated?: string;
   created_at: string;
 }
 

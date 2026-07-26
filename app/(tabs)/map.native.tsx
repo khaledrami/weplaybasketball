@@ -41,7 +41,7 @@ export default function MapScreen() {
   const filteredCourts = courts.filter((court) => {
     const matchesSearch = searchQuery === '' ||
       court.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      court.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      court.address?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       court.barrio?.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesFilter = selectedFilter === null || court.access_type === selectedFilter;
@@ -136,7 +136,7 @@ export default function MapScreen() {
                 </TouchableOpacity>
               </View>
 
-              <Text style={styles.modalAddress}>{selectedCourt.address}</Text>
+              <Text style={styles.modalAddress}>{selectedCourt.address || selectedCourt.barrio || 'Badalona'}</Text>
               {selectedCourt.barrio && (
                 <Text style={styles.modalBarrio}>{selectedCourt.barrio}</Text>
               )}
@@ -160,7 +160,7 @@ export default function MapScreen() {
                 </View>
                 <View style={styles.modalInfoRow}>
                   <Ionicons name="basketball" size={20} color="#007AFF" />
-                  <Text style={styles.modalInfoText}>{selectedCourt.hoops} cistelles</Text>
+                  <Text style={styles.modalInfoText}>{selectedCourt.hoops || 2} cistelles</Text>
                 </View>
                 <View style={styles.modalInfoRow}>
                   <Ionicons name="home" size={20} color="#007AFF" />
@@ -212,8 +212,18 @@ export default function MapScreen() {
               </TouchableOpacity>
 
               <View style={styles.modalSource}>
-                <Text style={styles.modalSourceLabel}>Font:</Text>
-                <Text style={styles.modalSourceValue}>{selectedCourt.source}</Text>
+                <Ionicons name="checkmark-circle" size={14} color={selectedCourt.confidence === 'high' ? '#34C759' : '#FF9500'} />
+                <Text style={styles.modalSourceLabel}>
+                  {selectedCourt.confidence === 'high' ? 'Dada verificada' : 'Dada aproximada'}
+                </Text>
+                <Text style={styles.modalSourceValue}>
+                  {' · '}
+                  {selectedCourt.source.includes('merged') ? 'Diputació + OSM' :
+                   selectedCourt.source === 'diba' ? 'Diputació de Barcelona' :
+                   selectedCourt.source === 'ajuntament' ? 'Ajuntament de Badalona' :
+                   selectedCourt.source === 'osm' ? 'OpenStreetMap' :
+                   selectedCourt.source}
+                </Text>
               </View>
 
               <PhotoUpload courtId={selectedCourt.id} />
@@ -324,7 +334,7 @@ const styles = StyleSheet.create({
   },
   modalManagerLabel: { color: '#8E8E93' },
   modalManagerValue: { fontWeight: '500' },
-  modalSource: { marginTop: 8, paddingVertical: 8, borderTopWidth: 1, borderTopColor: '#E5E5EA' },
+  modalSource: { marginTop: 8, paddingVertical: 8, borderTopWidth: 1, borderTopColor: '#E5E5EA', flexDirection: 'row', alignItems: 'center' },
   modalSourceLabel: { color: '#8E8E93', fontSize: 12 },
   modalSourceValue: { fontSize: 12, color: '#000000' },
   directionsButton: {
