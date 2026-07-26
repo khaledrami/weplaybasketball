@@ -42,7 +42,9 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "etl": "node --experimental-strip-types scripts/etl/run.ts",
+    "db:migrate": "supabase db reset --linked"
   },
   "private": true
 }
