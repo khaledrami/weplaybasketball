@@ -32,7 +32,7 @@ export default function RootLayout() {
     if (!session && !inAuthGroup) {
       router.replace('/(auth)/login');
     } else if (session && inAuthGroup) {
-      router.replace('/(tabs)');
+      router.replace('/(tabs)/map');
     }
   }, [session, segments, loading, router]);
 

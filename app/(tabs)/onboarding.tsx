@@ -64,7 +64,7 @@ export default function OnboardingScreen() {
     });
 
     if (success) {
-      router.replace('/(tabs)');
+      router.replace('/(tabs)/map');
     } else {
       Alert.alert(t('common.error'), 'Error al crear el perfil');
     }
