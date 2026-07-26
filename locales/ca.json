@@ -15,7 +15,13 @@
     "apple": "Continuar amb Apple",
     "forgot_password": "Has oblidat la contrasenya?",
     "no_account": "No tens compte? Registra't",
-    "has_account": "Ja tens compte? Inicia sessió"
+    "has_account": "Ja tens compte? Inicia sessió",
+    "fill_all": "Omple tots els camps",
+    "passwords_no_match": "Les contrasenyes no coincideixen",
+    "password_short": "La contrasenya ha de tenir almenys 6 caràcters",
+    "confirm_password": "Confirmar contrasenya",
+    "check_email": "Revisa el teu correu per confirmar el compte",
+    "create_account": "Crea el teu compte"
   },
   "profile": {
     "edit": "Editar perfil",
@@ -62,6 +68,7 @@
     "courts": "Pistes",
     "search": "Cercar pista...",
     "filter": "Filtrar",
+    "filter_all": "Totes",
     "all": "Tot",
     "access_free": "Lliure",
     "access_restricted": "Restringit",
@@ -77,6 +84,7 @@
     "details": "Detalls",
     "community_verified": "Verificat per la comunitat",
     "no_courts": "No s'han trobat pistes",
+    "no_courts_hint": "Prova a canviar els filtres",
     "manager": "Gestor:",
     "phone": "Telèfon:",
     "create_match": "Crear partit aquí",
@@ -240,5 +248,8 @@
     "userCount": "{{count}} usuaris",
     "matchCount": "{{count}} partits",
     "courtCount": "{{count}} pistes"
+  },
+  "onboarding": {
+    "subtitle": "Completa el teu perfil per començar a jugar"
   }
 }

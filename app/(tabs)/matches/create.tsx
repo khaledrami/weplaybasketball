@@ -139,7 +139,7 @@ export default function CreateMatchScreen() {
           <Text style={formData.court ? styles.pickerText : styles.pickerPlaceholder}>
             {formData.court ? formData.court.name : t('matches.court_placeholder')}
           </Text>
-          <Ionicons name="chevron-down" size={20} color="#8E8E93" />
+          <Ionicons name="chevron-down" size={20} color="#6C757D" />
         </TouchableOpacity>
 
         <Text style={styles.label}>{t('matches.date')} *</Text>
@@ -273,11 +273,11 @@ export default function CreateMatchScreen() {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{t('matches.court')}</Text>
               <TouchableOpacity onPress={() => setShowCourtPicker(false)}>
-                <Ionicons name="close" size={24} color="#8E8E93" />
+                <Ionicons name="close" size={24} color="#6C757D" />
               </TouchableOpacity>
             </View>
             <View style={styles.courtSearchBox}>
-              <Ionicons name="search" size={18} color="#8E8E93" />
+              <Ionicons name="search" size={18} color="#6C757D" />
               <TextInput
                 style={styles.courtSearchInput}
                 placeholder={t('matches.court_search')}
@@ -287,7 +287,7 @@ export default function CreateMatchScreen() {
               />
               {courtSearch !== '' && (
                 <TouchableOpacity onPress={() => setCourtSearch('')}>
-                  <Ionicons name="close-circle" size={18} color="#8E8E93" />
+                  <Ionicons name="close-circle" size={18} color="#6C757D" />
                 </TouchableOpacity>
               )}
             </View>
@@ -305,9 +305,9 @@ export default function CreateMatchScreen() {
                 >
                   <View style={styles.courtItemContent}>
                     <Text style={styles.courtItemName}>{item.name}</Text>
-                    <Text style={styles.courtItemAddress}>{item.address || item.barrio || 'Badalona'}</Text>
+                    <Text style={styles.courtItemAddress}>{item.address || item.barrio || t('matches.defaultCity')}</Text>
                   </View>
-                  <View style={[styles.courtItemType, { backgroundColor: item.access_type === 'lliure' ? '#34C759' : item.access_type === 'restringit' ? '#FF3B30' : '#FF9500' }]}>
+                  <View style={[styles.courtItemType, { backgroundColor: item.access_type === 'lliure' ? '#2D9CDB' : item.access_type === 'restringit' ? '#E74C3C' : '#F4A261' }]}>
                     <Text style={styles.courtItemTypeText}>
                       {item.access_type === 'lliure' ? t('map.access_free') : item.access_type === 'restringit' ? t('map.access_restricted') : t('map.access_partial')}
                     </Text>
@@ -316,7 +316,7 @@ export default function CreateMatchScreen() {
               )}
               ListEmptyComponent={
                 <View style={{ padding: 24, alignItems: 'center' }}>
-                  <Text style={{ color: '#8E8E93' }}>{t('matches.no_courts_found')}</Text>
+                  <Text style={{ color: '#6C757D' }}>{t('matches.no_courts_found')}</Text>
                 </View>
               }
             />
@@ -330,14 +330,15 @@ export default function CreateMatchScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F8F9FA',
   },
   content: {
     padding: 24,
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: '700',
+    color: '#1C1C2E',
     marginBottom: 24,
   },
   form: {
@@ -346,17 +347,18 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#8E8E93',
+    color: '#6C757D',
     marginBottom: 4,
   },
   input: {
     height: 52,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
+    borderColor: '#DEE2E6',
     borderRadius: 12,
     paddingHorizontal: 16,
     fontSize: 16,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#F0F1F3',
+    color: '#1C1C2E',
   },
   textArea: {
     height: 100,
@@ -366,21 +368,21 @@ const styles = StyleSheet.create({
   picker: {
     height: 52,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
+    borderColor: '#DEE2E6',
     borderRadius: 12,
     paddingHorizontal: 16,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#F0F1F3',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   pickerText: {
     fontSize: 16,
-    color: '#000000',
+    color: '#1C1C2E',
   },
   pickerPlaceholder: {
     fontSize: 16,
-    color: '#8E8E93',
+    color: '#6C757D',
   },
   optionsRow: {
     flexDirection: 'row',
@@ -395,13 +397,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#EDF2F7',
   },
   optionSelected: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#1D3557',
   },
   optionText: {
-    color: '#000000',
+    color: '#1C1C2E',
     fontSize: 14,
   },
   optionTextSelected: {
@@ -415,17 +417,18 @@ const styles = StyleSheet.create({
   },
   toggleLabel: {
     fontSize: 16,
+    color: '#1C1C2E',
   },
   toggle: {
     width: 51,
     height: 31,
     borderRadius: 16,
-    backgroundColor: '#E5E5EA',
+    backgroundColor: '#DEE2E6',
     justifyContent: 'center',
     paddingHorizontal: 2,
   },
   toggleActive: {
-    backgroundColor: '#34C759',
+    backgroundColor: '#E76F51',
   },
   toggleDot: {
     width: 27,
@@ -437,32 +440,42 @@ const styles = StyleSheet.create({
     transform: [{ translateX: 20 }],
   },
   createButton: {
-    height: 52,
-    borderRadius: 12,
-    backgroundColor: '#007AFF',
+    height: 54,
+    borderRadius: 14,
+    backgroundColor: '#E76F51',
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 24,
+    shadowColor: '#E76F51',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   createButtonDisabled: {
-    backgroundColor: '#8E8E93',
+    backgroundColor: '#ADB5BD',
   },
   createButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '700',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(29, 53, 87, 0.6)',
     justifyContent: 'flex-end',
   },
   modalContent: {
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
     padding: 24,
     maxHeight: '70%',
+    shadowColor: '#1D3557',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -472,12 +485,13 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: '700',
+    color: '#1C1C2E',
   },
   courtSearchBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#F0F1F3',
     borderRadius: 10,
     paddingHorizontal: 12,
     height: 40,
@@ -487,16 +501,17 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 8,
     fontSize: 15,
+    color: '#1C1C2E',
   },
   courtItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
+    borderBottomColor: '#DEE2E6',
   },
   courtItemSelected: {
-    backgroundColor: '#F0F7FF',
+    backgroundColor: '#EDF2F7',
   },
   courtItemContent: {
     flex: 1,
@@ -504,11 +519,12 @@ const styles = StyleSheet.create({
   courtItemName: {
     fontSize: 16,
     fontWeight: '500',
+    color: '#1C1C2E',
     marginBottom: 4,
   },
   courtItemAddress: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: '#6C757D',
   },
   courtItemType: {
     paddingHorizontal: 10,

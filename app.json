@@ -7,13 +7,18 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "scheme": "weplaybasketball",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1D3557"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.weplaybasketball.app"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#FFFFFF",
+        "backgroundColor": "#1D3557",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"

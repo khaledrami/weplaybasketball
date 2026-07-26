@@ -82,7 +82,7 @@ export default function SocialScreen() {
     <View style={styles.playerCard}>
       <View style={styles.avatar}>
         <Text style={styles.avatarText}>
-          {item.friend.display_name?.charAt(0) || '?'}
+          {item.friend.display_name?.charAt(0) || '🏀'}
         </Text>
       </View>
       <View style={styles.playerInfo}>
@@ -93,7 +93,7 @@ export default function SocialScreen() {
         style={styles.messageButton}
         onPress={() => Alert.alert(t('common.info'), t('social.chatComingSoon'))}
       >
-        <Ionicons name="chatbubble-outline" size={20} color="#007AFF" />
+        <Ionicons name="chatbubble-outline" size={20} color="#1D3557" />
       </TouchableOpacity>
     </View>
   );
@@ -102,7 +102,7 @@ export default function SocialScreen() {
     <View style={styles.playerCard}>
       <View style={styles.avatar}>
         <Text style={styles.avatarText}>
-          {item.requester.display_name?.charAt(0) || '?'}
+          {item.requester.display_name?.charAt(0) || '🏀'}
         </Text>
       </View>
       <View style={styles.playerInfo}>
@@ -130,7 +130,7 @@ export default function SocialScreen() {
     <View style={styles.playerCard}>
       <View style={styles.avatar}>
         <Text style={styles.avatarText}>
-          {item.display_name?.charAt(0) || '?'}
+          {item.display_name?.charAt(0) || '🏀'}
         </Text>
       </View>
       <View style={styles.playerInfo}>
@@ -169,7 +169,7 @@ export default function SocialScreen() {
       {activeTab === 'search' && (
         <View style={styles.searchContainer}>
           <View style={styles.searchInput}>
-            <Ionicons name="search" size={20} color="#8E8E93" />
+            <Ionicons name="search" size={20} color="#6C757D" />
             <TextInput
               style={styles.searchField}
               value={searchQuery}
@@ -180,7 +180,7 @@ export default function SocialScreen() {
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={() => { setSearchQuery(''); setSearchResults([]); }}>
-                <Ionicons name="close-circle" size={20} color="#8E8E93" />
+                <Ionicons name="close-circle" size={20} color="#6C757D" />
               </TouchableOpacity>
             )}
           </View>
@@ -194,11 +194,11 @@ export default function SocialScreen() {
           renderItem={renderFriend}
           contentContainerStyle={styles.list}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#E76F51']} />
           }
           ListEmptyComponent={
             <View style={styles.empty}>
-              <Ionicons name="people-outline" size={48} color="#E5E5EA" />
+              <Text style={{ fontSize: 56 }}>🤝</Text>
               <Text style={styles.emptyText}>{t('social.noFriends')}</Text>
             </View>
           }
@@ -212,11 +212,11 @@ export default function SocialScreen() {
           renderItem={renderPendingRequest}
           contentContainerStyle={styles.list}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#E76F51']} />
           }
           ListEmptyComponent={
             <View style={styles.empty}>
-              <Ionicons name="time-outline" size={48} color="#E5E5EA" />
+              <Text style={{ fontSize: 56 }}>⏳</Text>
               <Text style={styles.emptyText}>{t('social.noPending')}</Text>
             </View>
           }
@@ -230,11 +230,11 @@ export default function SocialScreen() {
           renderItem={renderSearchResult}
           contentContainerStyle={styles.list}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#E76F51']} />
           }
           ListEmptyComponent={
             <View style={styles.empty}>
-              <Ionicons name="search-outline" size={48} color="#E5E5EA" />
+              <Text style={{ fontSize: 56 }}>🔍</Text>
               <Text style={styles.emptyText}>{t('social.noResults')}</Text>
             </View>
           }
@@ -247,7 +247,7 @@ export default function SocialScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F8F9FA',
   },
   header: {
     padding: 24,
@@ -255,7 +255,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: '700',
+    color: '#1C1C2E',
   },
   tabs: {
     flexDirection: 'row',
@@ -270,21 +271,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 16,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#EDF2F7',
   },
   tabActive: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#1D3557',
   },
   tabText: {
-    color: '#8E8E93',
+    color: '#6C757D',
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   tabTextActive: {
     color: '#FFFFFF',
   },
   badge: {
-    backgroundColor: '#FF3B30',
+    backgroundColor: '#E74C3C',
     borderRadius: 10,
     minWidth: 20,
     height: 20,
@@ -295,7 +296,7 @@ const styles = StyleSheet.create({
   badgeText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   searchContainer: {
     paddingHorizontal: 24,
@@ -305,14 +306,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     height: 44,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     paddingHorizontal: 12,
     gap: 8,
+    shadowColor: '#1D3557',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#DEE2E6',
   },
   searchField: {
     flex: 1,
     fontSize: 16,
+    color: '#1C1C2E',
   },
   list: {
     padding: 24,
@@ -321,41 +330,48 @@ const styles = StyleSheet.create({
   playerCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 14,
+    shadowColor: '#1D3557',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#DEE2E6',
   },
   avatar: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#007AFF',
+    backgroundColor: '#1D3557',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 14,
   },
   avatarText: {
-    color: '#FFFFFF',
     fontSize: 18,
-    fontWeight: '600',
   },
   playerInfo: {
     flex: 1,
   },
   playerName: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
+    color: '#1C1C2E',
     marginBottom: 2,
   },
   playerLevel: {
-    fontSize: 14,
-    color: '#8E8E93',
+    fontSize: 13,
+    color: '#E76F51',
+    fontWeight: '500',
   },
   messageButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#EDF2F7',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -367,7 +383,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#34C759',
+    backgroundColor: '#2D9CDB',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -375,7 +391,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#FF3B30',
+    backgroundColor: '#E74C3C',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -385,7 +401,8 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#8E8E93',
+    color: '#6C757D',
     marginTop: 16,
+    fontWeight: '500',
   },
 });

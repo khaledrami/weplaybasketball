@@ -15,7 +15,13 @@
     "apple": "Continuar con Apple",
     "forgot_password": "¿Has olvidado la contraseña?",
     "no_account": "¿No tienes cuenta? Regístrate",
-    "has_account": "¿Ya tienes cuenta? Inicia sesión"
+    "has_account": "¿Ya tienes cuenta? Inicia sesión",
+    "fill_all": "Rellena todos los campos",
+    "passwords_no_match": "Las contraseñas no coinciden",
+    "password_short": "La contraseña debe tener al menos 6 caracteres",
+    "confirm_password": "Confirmar contraseña",
+    "check_email": "Revisa tu correo para confirmar la cuenta",
+    "create_account": "Crea tu cuenta"
   },
   "profile": {
     "edit": "Editar perfil",
@@ -62,6 +68,7 @@
     "courts": "Pistas",
     "search": "Buscar pista...",
     "filter": "Filtrar",
+    "filter_all": "Todas",
     "all": "Todos",
     "access_free": "Libre",
     "access_restricted": "Restringido",
@@ -77,6 +84,7 @@
     "details": "Detalles",
     "community_verified": "Verificado por la comunidad",
     "no_courts": "No se encontraron pistas",
+    "no_courts_hint": "Prueba a cambiar los filtros",
     "manager": "Gestor:",
     "phone": "Teléfono:",
     "create_match": "Crear partido aquí",
@@ -240,5 +248,8 @@
     "userCount": "{{count}} usuarios",
     "matchCount": "{{count}} partidos",
     "courtCount": "{{count}} pistas"
+  },
+  "onboarding": {
+    "subtitle": "Completa tu perfil para empezar a jugar"
   }
 }

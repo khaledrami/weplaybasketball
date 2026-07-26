@@ -106,7 +106,7 @@ export default function MatchDetailScreen() {
   if (loading) {
     return (
       <View style={styles.loading}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color="#E76F51" />
       </View>
     );
   }
@@ -128,14 +128,14 @@ export default function MatchDetailScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#007AFF" />
+          <Ionicons name="arrow-back" size={24} color="#1D3557" />
         </TouchableOpacity>
         <Text style={styles.title}>{t('matches.details')}</Text>
       </View>
 
       <View style={styles.courtCard}>
         <View style={styles.courtHeader}>
-          <Ionicons name="location" size={24} color="#007AFF" />
+          <Ionicons name="location" size={24} color="#1D3557" />
           <Text style={styles.courtName}>{match.court.name}</Text>
         </View>
         <Text style={styles.courtAddress}>{match.court.address || t('matches.defaultCity')}</Text>
@@ -146,7 +146,7 @@ export default function MatchDetailScreen() {
 
       <View style={styles.detailsCard}>
         <View style={styles.detailRow}>
-          <Ionicons name="calendar" size={20} color="#8E8E93" />
+          <Ionicons name="calendar" size={20} color="#1D3557" />
           <Text style={styles.detailLabel}>{t('matches.date')}</Text>
           <Text style={styles.detailValue}>
             {format(new Date(match.scheduled_at), 'dd/MM/yyyy')}
@@ -154,7 +154,7 @@ export default function MatchDetailScreen() {
         </View>
 
         <View style={styles.detailRow}>
-          <Ionicons name="time" size={20} color="#8E8E93" />
+          <Ionicons name="time" size={20} color="#1D3557" />
           <Text style={styles.detailLabel}>{t('matches.time')}</Text>
           <Text style={styles.detailValue}>
             {format(new Date(match.scheduled_at), 'HH:mm')} • {match.duration_minutes}min
@@ -162,7 +162,7 @@ export default function MatchDetailScreen() {
         </View>
 
         <View style={styles.detailRow}>
-          <Ionicons name="people" size={20} color="#8E8E93" />
+          <Ionicons name="people" size={20} color="#1D3557" />
           <Text style={styles.detailLabel}>{t('matches.players')}</Text>
           <Text style={styles.detailValue}>
             {match.current_players}/{match.max_players}
@@ -170,7 +170,7 @@ export default function MatchDetailScreen() {
         </View>
 
         <View style={styles.detailRow}>
-          <Ionicons name="star" size={20} color="#8E8E93" />
+          <Ionicons name="star" size={20} color="#1D3557" />
           <Text style={styles.detailLabel}>{t('matches.level')}</Text>
           <Text style={styles.detailValue}>
             {match.level_required ? match.level_required : t('matches.anyLevel')}
@@ -178,7 +178,7 @@ export default function MatchDetailScreen() {
         </View>
 
         <View style={styles.detailRow}>
-          <Ionicons name="language" size={20} color="#8E8E93" />
+          <Ionicons name="language" size={20} color="#1D3557" />
           <Text style={styles.detailLabel}>{t('matches.language')}</Text>
           <Text style={styles.detailValue}>
             {match.language === 'ca' ? t('matches.langCatalan') : match.language === 'es' ? t('matches.langSpanish') : t('matches.anyLanguage')}
@@ -186,7 +186,7 @@ export default function MatchDetailScreen() {
         </View>
 
         <View style={styles.detailRow}>
-          <Ionicons name="people-circle" size={20} color="#8E8E93" />
+          <Ionicons name="people-circle" size={20} color="#1D3557" />
           <Text style={styles.detailLabel}>{t('matches.mixed')}</Text>
           <Text style={styles.detailValue}>
             {match.is_mixed ? t('common.yes') : t('common.no')}
@@ -208,7 +208,7 @@ export default function MatchDetailScreen() {
             <View key={player.id} style={styles.playerCard}>
               <View style={styles.playerAvatar}>
                 <Text style={styles.playerInitial}>
-                  {player.profile?.display_name?.charAt(0) || '?'}
+                  {player.profile?.display_name?.charAt(0) || '🏀'}
                 </Text>
               </View>
               <View style={styles.playerInfo}>
@@ -303,7 +303,7 @@ export default function MatchDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F8F9FA',
   },
   content: {
     padding: 24,
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: '#8E8E93',
+    color: '#6C757D',
   },
   header: {
     flexDirection: 'row',
@@ -330,146 +330,178 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F2F2F7',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#EDF2F7',
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#1D3557',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 1,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#1C1C2E',
   },
   courtCard: {
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    padding: 18,
+    marginBottom: 18,
+    shadowColor: '#1D3557',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#DEE2E6',
   },
   courtHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
+    gap: 10,
+    marginBottom: 10,
   },
   courtName: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1C1C2E',
   },
   courtAddress: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: '#6C757D',
     marginBottom: 4,
   },
   courtBarrio: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: '#E76F51',
+    fontWeight: '500',
   },
   detailsCard: {
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    padding: 18,
+    marginBottom: 18,
+    shadowColor: '#1D3557',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#DEE2E6',
   },
   detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
+    borderBottomColor: '#DEE2E6',
   },
   detailLabel: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: 14,
     fontSize: 14,
-    color: '#8E8E93',
+    color: '#6C757D',
   },
   detailValue: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
+    color: '#1C1C2E',
   },
   descriptionCard: {
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    padding: 18,
+    marginBottom: 18,
+    shadowColor: '#1D3557',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#DEE2E6',
   },
   descriptionLabel: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: '#6C757D',
     marginBottom: 8,
   },
   descriptionText: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 15,
+    lineHeight: 22,
+    color: '#1C1C2E',
   },
   playersSection: {
     marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 12,
+    fontWeight: '700',
+    color: '#1C1C2E',
+    marginBottom: 14,
   },
   playerCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
+    borderBottomColor: '#DEE2E6',
   },
   playerAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#007AFF',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#1D3557',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 14,
   },
   playerInitial: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 18,
   },
   playerInfo: {
     flex: 1,
   },
   playerName: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
+    color: '#1C1C2E',
     marginBottom: 2,
   },
   playerLevel: {
     fontSize: 12,
-    color: '#8E8E93',
+    color: '#E76F51',
+    fontWeight: '500',
   },
   creatorBadge: {
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
-    backgroundColor: '#FFF3E0',
+    backgroundColor: '#FEF3E2',
   },
   creatorText: {
-    fontSize: 12,
-    color: '#FF9500',
-    fontWeight: '500',
+    fontSize: 11,
+    color: '#E76F51',
+    fontWeight: '600',
   },
   waitlistBadge: {
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#EDF2F7',
   },
   waitlistText: {
-    fontSize: 12,
-    color: '#8E8E93',
-    fontWeight: '500',
+    fontSize: 11,
+    color: '#6C757D',
+    fontWeight: '600',
   },
   noPlayers: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: '#6C757D',
     textAlign: 'center',
     padding: 24,
   },
@@ -477,57 +509,69 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   joinButton: {
-    height: 52,
-    borderRadius: 12,
-    backgroundColor: '#34C759',
+    height: 54,
+    borderRadius: 14,
+    backgroundColor: '#E76F51',
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#E76F51',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   joinButtonDisabled: {
-    backgroundColor: '#8E8E93',
+    backgroundColor: '#ADB5BD',
   },
   joinButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '700',
   },
   leaveButton: {
-    height: 52,
-    borderRadius: 12,
-    backgroundColor: '#FF3B30',
+    height: 54,
+    borderRadius: 14,
+    backgroundColor: '#E74C3C',
     justifyContent: 'center',
     alignItems: 'center',
   },
   leaveButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '700',
   },
   cancelButton: {
-    height: 52,
-    borderRadius: 12,
-    backgroundColor: '#F2F2F7',
+    height: 54,
+    borderRadius: 14,
+    backgroundColor: '#EDF2F7',
+    borderWidth: 1,
+    borderColor: '#DEE2E6',
     justifyContent: 'center',
     alignItems: 'center',
   },
   cancelButtonText: {
-    color: '#FF3B30',
-    fontSize: 16,
-    fontWeight: '600',
+    color: '#E74C3C',
+    fontSize: 17,
+    fontWeight: '700',
   },
   rateButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    height: 52,
-    borderRadius: 12,
-    backgroundColor: '#FF9500',
+    height: 54,
+    borderRadius: 14,
+    backgroundColor: '#F4A261',
     marginBottom: 12,
+    shadowColor: '#F4A261',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   rateButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '700',
   },
 });

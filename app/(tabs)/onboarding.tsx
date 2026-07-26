@@ -13,6 +13,7 @@ import { useProfile } from '../../lib/profile';
 import { useTranslation } from '../../lib/i18n';
 import { supabase } from '../../lib/supabase';
 import { Position, DominantHand, SkillLevel } from '../../lib/types';
+import { Ionicons } from '@expo/vector-icons';
 
 const POSITIONS: { value: Position; label: string }[] = [
   { value: 'base', label: 'Base' },
@@ -50,7 +51,7 @@ export default function OnboardingScreen() {
 
   const handleComplete = async () => {
     if (!formData.display_name.trim()) {
-      Alert.alert(t('common.error'), 'El nom és obligatori');
+      Alert.alert(t('common.error'), t('profile.name_required'));
       return;
     }
 
@@ -66,14 +67,17 @@ export default function OnboardingScreen() {
     if (success) {
       router.replace('/(tabs)/map');
     } else {
-      Alert.alert(t('common.error'), 'Error al crear el perfil');
+      Alert.alert(t('common.error'), t('common.error'));
     }
   };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Benvingut a WePlayBasketball</Text>
-      <Text style={styles.subtitle}>Completa el teu perfil per començar</Text>
+      <View style={styles.logoContainer}>
+        <Ionicons name="basketball" size={64} color="#E76F51" />
+      </View>
+      <Text style={styles.title}>{t('app_name')}</Text>
+      <Text style={styles.subtitle}>{t('onboarding.subtitle')}</Text>
 
       <View style={styles.form}>
         <Text style={styles.label}>{t('profile.name')} *</Text>
@@ -81,7 +85,7 @@ export default function OnboardingScreen() {
           style={styles.input}
           value={formData.display_name}
           onChangeText={(v) => setFormData({ ...formData, display_name: v })}
-          placeholder="El teu nom"
+          placeholder={t('profile.name')}
         />
 
         <Text style={styles.label}>{t('profile.age')}</Text>
@@ -90,7 +94,7 @@ export default function OnboardingScreen() {
           value={formData.age}
           onChangeText={(v) => setFormData({ ...formData, age: v })}
           keyboardType="numeric"
-          placeholder="La teva edat"
+          placeholder={t('profile.age')}
         />
 
         <Text style={styles.label}>{t('profile.height')}</Text>
@@ -99,7 +103,7 @@ export default function OnboardingScreen() {
           value={formData.height_cm}
           onChangeText={(v) => setFormData({ ...formData, height_cm: v })}
           keyboardType="numeric"
-          placeholder="La teva alçada en cm"
+          placeholder={t('profile.height')}
         />
 
         <Text style={styles.label}>{t('profile.position')}</Text>
@@ -143,40 +147,49 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F8F9FA',
   },
   content: {
     padding: 24,
+    flexGrow: 1,
+    justifyContent: 'center',
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 24,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 32,
+    fontWeight: '800',
     textAlign: 'center',
+    color: '#1C1C2E',
     marginBottom: 8,
+    letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 16,
     textAlign: 'center',
-    color: '#8E8E93',
-    marginBottom: 32,
+    color: '#6C757D',
+    marginBottom: 36,
   },
   form: {
-    gap: 12,
+    gap: 16,
   },
   label: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#8E8E93',
+    color: '#6C757D',
     marginBottom: 4,
   },
   input: {
     height: 52,
     borderWidth: 1,
-    borderColor: '#E5E5EA',
+    borderColor: '#DEE2E6',
     borderRadius: 12,
     paddingHorizontal: 16,
     fontSize: 16,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#F0F1F3',
+    color: '#1C1C2E',
   },
   options: {
     flexDirection: 'row',
@@ -187,28 +200,34 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#EDF2F7',
   },
   optionSelected: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#1D3557',
   },
   optionText: {
-    color: '#000000',
+    color: '#1C1C2E',
+    fontWeight: '500',
   },
   optionTextSelected: {
     color: '#FFFFFF',
   },
   button: {
-    height: 52,
-    borderRadius: 12,
+    height: 54,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#007AFF',
+    backgroundColor: '#E76F51',
     marginTop: 24,
+    shadowColor: '#E76F51',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   buttonText: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '700',
   },
 });
