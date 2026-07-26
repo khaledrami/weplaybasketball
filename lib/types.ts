@@ -49,6 +49,7 @@ export interface Court {
   email?: string;
   website?: string;
   photo_urls: string[];
+  opening_hours?: string;
   source: string;
   confidence: 'high' | 'medium' | 'low';
   created_at: string;

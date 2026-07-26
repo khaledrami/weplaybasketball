@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TextInput, TouchableOpacity, FlatList, Modal } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, TextInput, TouchableOpacity, FlatList, Modal, Linking, Platform } from 'react-native';
 import { useTranslation } from '../../lib/i18n';
 import { fetchCourts, getCourtMarkerColor } from '../../lib/courts';
 import { Court } from '../../lib/types';
 import { Ionicons } from '@expo/vector-icons';
+import WebMapView from '../../components/WebMapView';
 
 const COURT_TYPE_LABELS: Record<string, string> = {
   outdoor: 'Exterior',
@@ -132,6 +133,10 @@ export default function MapScreen() {
         </TouchableOpacity>
       </View>
 
+      <View style={styles.mapContainer}>
+        <WebMapView courts={filteredCourts} onCourtPress={handleCourtPress} />
+      </View>
+
       <FlatList
         data={filteredCourts}
         keyExtractor={(item) => String(item.id)}
@@ -212,6 +217,27 @@ export default function MapScreen() {
                   </View>
                 )}
 
+                {selectedCourt.opening_hours && (
+                  <View style={styles.modalInfoRow}>
+                    <Ionicons name="time" size={20} color="#FF9500" />
+                    <Text style={styles.modalInfoText}>{selectedCourt.opening_hours}</Text>
+                  </View>
+                )}
+
+                <TouchableOpacity
+                  style={styles.directionsButton}
+                  onPress={() => {
+                    const url = Platform.select({
+                      web: `https://www.google.com/maps/dir/?api=1&destination=${selectedCourt.lat},${selectedCourt.lng}`,
+                      default: `https://www.google.com/maps/dir/?api=1&destination=${selectedCourt.lat},${selectedCourt.lng}`,
+                    });
+                    Linking.openURL(url);
+                  }}
+                >
+                  <Ionicons name="navigate" size={20} color="#FFFFFF" />
+                  <Text style={styles.directionsButtonText}>{t('map.directions')}</Text>
+                </TouchableOpacity>
+
                 <View style={styles.modalSource}>
                   <Text style={styles.modalSourceLabel}>Font:</Text>
                   <Text style={styles.modalSourceValue}>{selectedCourt.source}</Text>
@@ -283,6 +309,13 @@ const styles = StyleSheet.create({
   filterTextActive: {
     color: '#FFFFFF',
     fontWeight: '600',
+  },
+  mapContainer: {
+    height: 350,
+    marginHorizontal: 16,
+    marginBottom: 12,
+    borderRadius: 12,
+    overflow: 'hidden',
   },
   listContent: {
     paddingHorizontal: 16,
@@ -405,5 +438,20 @@ const styles = StyleSheet.create({
   modalSourceValue: {
     fontSize: 12,
     color: '#000000',
+  },
+  directionsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#007AFF',
+    borderRadius: 12,
+    padding: 14,
+    marginTop: 16,
+    gap: 8,
+  },
+  directionsButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

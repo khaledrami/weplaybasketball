@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS courts (
   email TEXT,
   website TEXT,
   photo_urls TEXT[] DEFAULT '{}',
+  opening_hours TEXT,
   source TEXT NOT NULL,
   confidence TEXT DEFAULT 'medium' CHECK (confidence IN ('high', 'medium', 'low')),
   created_at TIMESTAMPTZ DEFAULT NOW()

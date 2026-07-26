@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TextInput, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, TextInput, TouchableOpacity, Modal, Linking, Platform } from 'react-native';
 import { useTranslation } from '../../lib/i18n';
 import { fetchCourts, getCourtMarkerColor } from '../../lib/courts';
 import { Court } from '../../lib/types';
@@ -184,6 +184,24 @@ export default function MapScreen() {
                 </View>
               )}
 
+              {selectedCourt.opening_hours && (
+                <View style={styles.modalInfoRow}>
+                  <Ionicons name="time" size={20} color="#FF9500" />
+                  <Text style={styles.modalInfoText}>{selectedCourt.opening_hours}</Text>
+                </View>
+              )}
+
+              <TouchableOpacity
+                style={styles.directionsButton}
+                onPress={() => {
+                  const url = `https://www.google.com/maps/dir/?api=1&destination=${selectedCourt.lat},${selectedCourt.lng}`;
+                  Linking.openURL(url);
+                }}
+              >
+                <Ionicons name="navigate" size={20} color="#FFFFFF" />
+                <Text style={styles.directionsButtonText}>{t('map.directions')}</Text>
+              </TouchableOpacity>
+
               <View style={styles.modalSource}>
                 <Text style={styles.modalSourceLabel}>Font:</Text>
                 <Text style={styles.modalSourceValue}>{selectedCourt.source}</Text>
@@ -287,4 +305,19 @@ const styles = StyleSheet.create({
   modalSource: { marginTop: 8, paddingVertical: 8, borderTopWidth: 1, borderTopColor: '#E5E5EA' },
   modalSourceLabel: { color: '#8E8E93', fontSize: 12 },
   modalSourceValue: { fontSize: 12, color: '#000000' },
+  directionsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#007AFF',
+    borderRadius: 12,
+    padding: 14,
+    marginTop: 16,
+    gap: 8,
+  },
+  directionsButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
 });
