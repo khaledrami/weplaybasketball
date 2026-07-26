@@ -30,6 +30,7 @@ export interface MergedCourt {
   source_id: string;
   confidence: string;
   rawData: AnyCourt[];
+  _dedupIdx?: number;
 }
 
 // --- Geohash encoder (precision 6) ---
@@ -224,6 +225,27 @@ export function mergeCourts(
   for (const ac of ajt) {
     if (used.has(`ajt:${ac.source_id}`)) continue;
     if (!ac.lat || !ac.lng) continue;
+
+    // Try to match against already-merged entries by proximity
+    let matched = false;
+    for (const existing of merged) {
+      const dist = haversineDistance(ac.lat, ac.lng, existing.lat, existing.lng);
+      if (dist < 150) {
+        used.add(`ajt:${ac.source_id}`);
+        existing.rawData.push(ac);
+        existing.source = "merged";
+        if (ac.phone) existing.phone = ac.phone;
+        if (ac.email) existing.email = ac.email;
+        if (ac.website) existing.website = ac.website;
+        if (ac.address && (!existing.address || ac.address.length > existing.address.length)) {
+          existing.address = ac.address;
+        }
+        matched = true;
+        break;
+      }
+    }
+    if (matched) continue;
+
     used.add(`ajt:${ac.source_id}`);
 
     merged.push({
@@ -259,10 +281,29 @@ export function mergeCourts(
     // Skip private courts not accessible to public
     if (oc.access_type === "restringit") continue;
 
+    // Try to match against already-merged entries by proximity
+    let matched = false;
+    for (const existing of merged) {
+      const dist = haversineDistance(oc.lat, oc.lng, existing.lat, existing.lng);
+      if (dist < 150) {
+        used.add(`osm:${oc.source_id}`);
+        existing.rawData.push(oc);
+        if (!existing.source.includes("osm")) existing.source = "merged";
+        if (oc.surface) existing.surface = oc.surface;
+        if (oc.has_lighting !== null) existing.has_lighting = oc.has_lighting;
+        if (oc.hoops !== null) existing.hoops = oc.hoops;
+        if (!existing.address && oc.address) existing.address = oc.address;
+        existing.confidence = "high";
+        matched = true;
+        break;
+      }
+    }
+    if (matched) continue;
+
     used.add(`osm:${oc.source_id}`);
 
     merged.push({
-      name: oc.name || `Pista OSM #${oc.source_id}`,
+      name: oc.name || `Pista OSM ${oc.source_id}`,
       address: oc.address,
       barrio: null,
       lat: oc.lat,
@@ -286,9 +327,43 @@ export function mergeCourts(
     });
   }
 
-  console.log(`[merge] Result: ${merged.length} merged courts`);
+  // Phase 4: Final dedup — collapse courts within 150m OR with identical normalized names
+  // Priority: keep the one with more rawData (more sources = better)
+  const deduped: MergedCourt[] = [];
+  const mergedUsed = new Set<number>();
+
+  for (let i = 0; i < merged.length; i++) {
+    if (mergedUsed.has(i)) continue;
+
+    let best = merged[i];
+    best._dedupIdx = i;
+
+    for (let j = i + 1; j < merged.length; j++) {
+      if (mergedUsed.has(j)) continue;
+
+      const dist = haversineDistance(best.lat, best.lng, merged[j].lat, merged[j].lng);
+      const nameMatch = normalize(best.name) === normalize(merged[j].name) && normalize(best.name).length > 3;
+      const closeProximity = dist < 150;
+
+      if (closeProximity || nameMatch) {
+        mergedUsed.add(j);
+        // Keep the one with more sources
+        if (merged[j].rawData.length > best.rawData.length) {
+          const prev = best;
+          best = merged[j];
+          // Transfer any extra data from the prev
+          if (!best.phone && prev.phone) best.phone = prev.phone;
+          if (!best.address && prev.address) best.address = prev.address;
+        }
+      }
+    }
+
+    deduped.push(best);
+  }
+
+  console.log(`[merge] After dedup: ${deduped.length} courts (from ${merged.length})`);
   console.log(`[merge] Sources: diba=${diba.length}, osm=${osm.length}, ajt=${ajt.length}`);
   console.log(`[merge] Used: ${used.size} source records matched`);
 
-  return merged;
+  return deduped;
 }

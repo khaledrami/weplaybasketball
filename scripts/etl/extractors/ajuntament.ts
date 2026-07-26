@@ -112,6 +112,12 @@ export async function extractAjuntament(): Promise<ExtractedCourt[]> {
     "policia", "comisaria", "bombers", "consell", "delegacio",
   ];
 
+  // Exclude basketball CLUBS (they rent/share courts, are not courts themselves)
+  const clubKeywords = [
+    "club ", "associacio", "base -", "unio basquet",
+    "cb badalona", "garcia vico",
+  ];
+
   const results: ExtractedCourt[] = [];
 
   for (let i = 1; i < lines.length; i++) {
@@ -131,8 +137,9 @@ export async function extractAjuntament(): Promise<ExtractedCourt[]> {
 
     // Exclude clearly non-basketball
     const isExcluded = excludeKeywords.some((kw) => nomLower.includes(kw));
+    const isClub = clubKeywords.some((kw) => nomLower.includes(kw));
 
-    if ((!isSport && !isBasketball) || isExcluded) continue;
+    if ((!isSport && !isBasketball) || isExcluded || isClub) continue;
 
     const id = fields[idx.id] || `${i}`;
     const lat = parseCoord(fields[idx.lat]);

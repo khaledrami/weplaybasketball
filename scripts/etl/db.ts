@@ -43,6 +43,28 @@ export async function upsertCourts(courts: MergedCourt[]): Promise<number> {
   const BATCH_SIZE = 25;
   let upserted = 0;
 
+  // Collect all source_ids being upserted
+  const activeSourceIds = courts.map(c => c.source_id);
+
+  // Phase 0: Delete ALL ETL-sourced courts, then re-insert
+  // This avoids stale duplicates from source column mismatches (e.g. diba|id vs merged|id)
+  const { data: existingCourts } = await supabase
+    .from("courts")
+    .select("id,source");
+
+  const etlPatterns = ["diba", "osm", "ajuntament", "merged"];
+  const toDelete = (existingCourts || []).filter(c =>
+    etlPatterns.some(s => c.source === s || c.source?.includes(s))
+  );
+
+  if (toDelete.length > 0) {
+    console.log(`[db] Removing ${toDelete.length} ETL courts for clean re-insert`);
+    const ids = toDelete.map(c => c.id);
+    for (let i = 0; i < ids.length; i += 50) {
+      await supabase.from("courts").delete().in("id", ids.slice(i, i + 50));
+    }
+  }
+
   for (let i = 0; i < courts.length; i += BATCH_SIZE) {
     const batch = courts.slice(i, i + BATCH_SIZE);
 

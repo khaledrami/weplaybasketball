@@ -131,31 +131,46 @@ function osmToExtracted(osm: OsmCourt): ExtractedCourt | null {
 export async function extractOsm(): Promise<ExtractedCourt[]> {
   console.log("[osm] Querying Overpass API for basketball courts in Badalona...");
 
-  const resp = await fetch(OVERPASS_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      "User-Agent": "WePlayBasketball-ETL/1.0",
-    },
-    body: `data=${encodeURIComponent(QUERY)}`,
-  });
+  let lastError: Error | null = null;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const resp = await fetch(OVERPASS_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "User-Agent": "WePlayBasketball-ETL/1.0",
+        },
+        body: `data=${encodeURIComponent(QUERY)}`,
+        signal: AbortSignal.timeout(90000),
+      });
 
-  if (!resp.ok) {
-    throw new Error(`Overpass API error: ${resp.status} ${resp.statusText}`);
+      if (!resp.ok) {
+        throw new Error(`Overpass API error: ${resp.status} ${resp.statusText}`);
+      }
+
+      const data = await resp.json();
+      const elements: any[] = data.elements || [];
+
+      console.log(`[osm] Received ${elements.length} elements`);
+
+      const courts: ExtractedCourt[] = [];
+      for (const el of elements) {
+        const osm = parseOsmElement(el);
+        const extracted = osmToExtracted(osm);
+        if (extracted) courts.push(extracted);
+      }
+
+      console.log(`[osm] Extracted ${courts.length} courts with valid coordinates`);
+      return courts;
+    } catch (e) {
+      lastError = e as Error;
+      console.warn(`[osm] Attempt ${attempt} failed: ${lastError.message}`);
+      if (attempt < 3) {
+        await new Promise((r) => setTimeout(r, attempt * 5000));
+      }
+    }
   }
 
-  const data = await resp.json();
-  const elements: any[] = data.elements || [];
-
-  console.log(`[osm] Received ${elements.length} elements`);
-
-  const courts: ExtractedCourt[] = [];
-  for (const el of elements) {
-    const osm = parseOsmElement(el);
-    const extracted = osmToExtracted(osm);
-    if (extracted) courts.push(extracted);
-  }
-
-  console.log(`[osm] Extracted ${courts.length} courts with valid coordinates`);
-  return courts;
+  console.error(`[osm] All 3 attempts failed. Last error: ${lastError?.message}`);
+  return [];
 }
