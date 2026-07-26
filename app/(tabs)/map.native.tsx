@@ -24,7 +24,7 @@ export default function MapScreen() {
   const [courts, setCourts] = useState<Court[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
+  const [selectedFilter, setSelectedFilter] = useState<string | null>('lliure');
   const [selectedCourt, setSelectedCourt] = useState<Court | null>(null);
   const [showCourtModal, setShowCourtModal] = useState(false);
 
@@ -140,6 +140,14 @@ export default function MapScreen() {
               {selectedCourt.barrio && (
                 <Text style={styles.modalBarrio}>{selectedCourt.barrio}</Text>
               )}
+
+              <TouchableOpacity
+                style={styles.streetViewButton}
+                onPress={() => Linking.openURL(`https://www.google.com/maps/@${selectedCourt.lat},${selectedCourt.lng},3a,75y,90t/data=!3m7!1e1!3m5!1sAF1QipMx!2e10!3e11!7i5376!8i2688`)}
+              >
+                <Ionicons name="videocam" size={18} color="#007AFF" />
+                <Text style={styles.streetViewText}>Veure a Street View</Text>
+              </TouchableOpacity>
 
               <View style={styles.modalInfo}>
                 <View style={styles.modalInfoRow}>
@@ -292,7 +300,18 @@ const styles = StyleSheet.create({
   },
   modalTitle: { fontSize: 20, fontWeight: 'bold', flex: 1 },
   modalAddress: { fontSize: 14, color: '#8E8E93', marginBottom: 4 },
-  modalBarrio: { fontSize: 14, color: '#007AFF', marginBottom: 16 },
+  modalBarrio: { fontSize: 14, color: '#007AFF', marginBottom: 12 },
+  streetViewButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#F2F2F7',
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  streetViewText: { fontSize: 13, color: '#007AFF', fontWeight: '500' },
   modalInfo: { gap: 12, marginBottom: 16 },
   modalInfoRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   modalInfoText: { fontSize: 14 },

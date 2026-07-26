@@ -42,7 +42,7 @@ export default function MapScreen() {
   const [courts, setCourts] = useState<Court[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
+  const [selectedFilter, setSelectedFilter] = useState<string | null>('lliure');
   const [selectedCourt, setSelectedCourt] = useState<Court | null>(null);
   const [showCourtModal, setShowCourtModal] = useState(false);
 
@@ -173,6 +173,32 @@ export default function MapScreen() {
                 {selectedCourt.barrio && (
                   <Text style={styles.modalBarrio}>{selectedCourt.barrio}</Text>
                 )}
+
+                <View style={styles.mapEmbedContainer}>
+                  <iframe
+                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${selectedCourt.lng - 0.005},${selectedCourt.lat - 0.003},${selectedCourt.lng + 0.005},${selectedCourt.lat + 0.003}&layer=mapnik&marker=${selectedCourt.lat},${selectedCourt.lng}`}
+                    style={{ width: '100%', height: 200, border: 'none', borderRadius: 12 }}
+                    loading="lazy"
+                    title={`Mapa de ${selectedCourt.name}`}
+                  />
+                </View>
+
+                <View style={styles.mapEmbedLinks}>
+                  <TouchableOpacity
+                    style={styles.mapEmbedLink}
+                    onPress={() => Linking.openURL(`https://www.openstreetmap.org/?mlat=${selectedCourt.lat}&mlon=${selectedCourt.lng}#map=17/${selectedCourt.lat}/${selectedCourt.lng}`)}
+                  >
+                    <Ionicons name="map" size={16} color="#007AFF" />
+                    <Text style={styles.mapEmbedLinkText}>Obrir al mapa</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.mapEmbedLink}
+                    onPress={() => Linking.openURL(`https://www.google.com/maps/@${selectedCourt.lat},${selectedCourt.lng},3a,75y,90t/data=!3m7!1e1!3m5!1sAF1QipMx!2e10!3e11!7i5376!8i2688`)}
+                  >
+                    <Ionicons name="videocam" size={16} color="#007AFF" />
+                    <Text style={styles.mapEmbedLinkText}>Street View</Text>
+                  </TouchableOpacity>
+                </View>
 
                 <View style={styles.modalInfo}>
                   <View style={styles.modalInfoRow}>
@@ -401,7 +427,26 @@ const styles = StyleSheet.create({
   modalBarrio: {
     fontSize: 14,
     color: '#007AFF',
+    marginBottom: 12,
+  },
+  mapEmbedContainer: {
+    marginBottom: 8,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  mapEmbedLinks: {
+    flexDirection: 'row',
+    gap: 16,
     marginBottom: 16,
+  },
+  mapEmbedLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  mapEmbedLinkText: {
+    fontSize: 13,
+    color: '#007AFF',
   },
   modalInfo: {
     gap: 12,
