@@ -1,7 +1,7 @@
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, Text } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
 import { Session } from '@supabase/supabase-js';
@@ -59,8 +59,9 @@ function RootLayoutContent() {
 
   if (loading || !fontsLoaded) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFFFFF' }}>
         <ActivityIndicator size="large" color="#E76F51" />
+        <Text style={{ marginTop: 16, color: '#6C757D', fontSize: 14 }}>Carregant app...</Text>
       </View>
     );
   }
