@@ -34,6 +34,12 @@ function escNum(n: number | null | undefined): string {
   return String(n);
 }
 
+function escArray(arr: string[] | null | undefined): string {
+  if (!arr || arr.length === 0) return "NULL";
+  const escaped = arr.map(s => `"${s.replace(/"/g, '\\"')}"`).join(",");
+  return `'{${escaped}}'`;
+}
+
 export async function upsertCourts(courts: MergedCourt[]): Promise<number> {
   const supabase = getSupabase();
 
@@ -86,6 +92,7 @@ export async function upsertCourts(courts: MergedCourt[]): Promise<number> {
       ${esc(c.phone)},
       ${esc(c.email)},
       ${esc(c.website)},
+      ${escArray(c.photo_urls)},
       ${esc(c.source)},
       ${esc(c.source_id)},
       ${esc(c.confidence)},
@@ -97,7 +104,7 @@ export async function upsertCourts(courts: MergedCourt[]): Promise<number> {
         name, address, barrio, lat, lng, geohash,
         court_type, access_type, hoops, surface,
         has_lighting, has_nets, opening_hours,
-        manager, phone, email, website,
+        manager, phone, email, website, photo_urls,
         source, source_id, confidence, last_updated
       ) VALUES
       ${values}
@@ -119,6 +126,7 @@ export async function upsertCourts(courts: MergedCourt[]): Promise<number> {
         phone = EXCLUDED.phone,
         email = EXCLUDED.email,
         website = EXCLUDED.website,
+        photo_urls = EXCLUDED.photo_urls,
         confidence = EXCLUDED.confidence,
         last_updated = NOW();
     `;
@@ -147,6 +155,7 @@ export async function upsertCourts(courts: MergedCourt[]): Promise<number> {
           phone: c.phone,
           email: c.email,
           website: c.website,
+          photo_urls: c.photo_urls,
           source: c.source,
           source_id: c.source_id,
           confidence: c.confidence,

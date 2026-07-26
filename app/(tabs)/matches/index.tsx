@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,13 +7,14 @@ import {
   StyleSheet,
   RefreshControl,
 } from 'react-native';
-import { useRouter, Link } from 'expo-router';
+import { useRouter, Link, useFocusEffect } from 'expo-router';
 import { useTranslation } from '../../../lib/i18n';
 import { useAuth } from '../../../lib/auth';
 import { fetchUpcomingMatches } from '../../../lib/matches';
 import { Match, Court } from '../../../lib/types';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
+import { supabase } from '../../../lib/supabase';
 
 type MatchWithCourt = Match & { court: Court };
 
@@ -25,15 +26,27 @@ export default function MatchesScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<'all' | 'joined' | 'my'>('all');
+  const [joinedMatchIds, setJoinedMatchIds] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    loadMatches();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadMatches();
+    }, [])
+  );
 
   const loadMatches = async () => {
     setLoading(true);
     const data = await fetchUpcomingMatches();
     setMatches(data);
+
+    if (user) {
+      const { data: playerRows } = await supabase
+        .from('match_players')
+        .select('match_id')
+        .eq('user_id', user.id);
+      setJoinedMatchIds(new Set(playerRows?.map((r) => r.match_id) ?? []));
+    }
+
     setLoading(false);
   };
 
@@ -46,7 +59,7 @@ export default function MatchesScreen() {
   const filteredMatches = matches.filter((match) => {
     if (filter === 'all') return true;
     if (filter === 'my') return match.creator_id === user?.id;
-    // For 'joined', we'd need to check match_players - simplified for now
+    if (filter === 'joined') return joinedMatchIds.has(match.id);
     return true;
   });
 

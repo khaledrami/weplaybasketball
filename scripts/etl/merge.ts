@@ -26,6 +26,7 @@ export interface MergedCourt {
   phone: string | null;
   email: string | null;
   website: string | null;
+  photo_urls: string[] | null;
   source: string;
   source_id: string;
   confidence: string;
@@ -36,7 +37,7 @@ export interface MergedCourt {
 // --- Geohash encoder (precision 6) ---
 const BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz";
 
-function geohashEncode(lat: number, lon: number, precision = 6): string {
+export function geohashEncode(lat: number, lon: number, precision = 6): string {
   const latRange = [-90, 90];
   const lonRange = [-180, 180];
   const gh: string[] = [];
@@ -174,6 +175,7 @@ export function mergeCourts(
       phone: dc.phone,
       email: dc.email,
       website: dc.website,
+      photo_urls: null,
       source: "diba",
       source_id: dc.source_id,
       confidence: dc.geocode_status.includes("manual") ? "high" : "medium",
@@ -208,11 +210,12 @@ export function mergeCourts(
       if (dist < 300) {
         used.add(`osm:${oc.source_id}`);
         entry.rawData.push(oc);
-        // OSM may have surface/lighting info
-        if (oc.surface) entry.surface = oc.surface;
-        if (oc.has_lighting !== null) entry.has_lighting = oc.has_lighting;
-        if (oc.hoops !== null) entry.hoops = oc.hoops;
-        if (!entry.address && oc.address) entry.address = oc.address;
+      // OSM may have surface/lighting info
+      if (oc.surface) entry.surface = oc.surface;
+      if (oc.has_lighting !== null) entry.has_lighting = oc.has_lighting;
+      if (oc.hoops !== null) entry.hoops = oc.hoops;
+      if (!entry.address && oc.address) entry.address = oc.address;
+      if (!entry.opening_hours && oc.opening_hours) entry.opening_hours = oc.opening_hours;
         entry.confidence = "high"; // matched across sources = high confidence
         break;
       }
@@ -266,6 +269,7 @@ export function mergeCourts(
       phone: ac.phone,
       email: ac.email,
       website: ac.website,
+      photo_urls: null,
       source: "ajuntament",
       source_id: ac.source_id,
       confidence: "medium",
@@ -293,6 +297,7 @@ export function mergeCourts(
         if (oc.has_lighting !== null) existing.has_lighting = oc.has_lighting;
         if (oc.hoops !== null) existing.hoops = oc.hoops;
         if (!existing.address && oc.address) existing.address = oc.address;
+        if (!existing.opening_hours && oc.opening_hours) existing.opening_hours = oc.opening_hours;
         existing.confidence = "high";
         matched = true;
         break;
@@ -302,10 +307,13 @@ export function mergeCourts(
 
     used.add(`osm:${oc.source_id}`);
 
+    // Build photo_urls from OSM image tag
+    const photoUrls = oc.image ? [oc.image] : null;
+
     merged.push({
       name: oc.name || `Pista OSM ${oc.source_id}`,
       address: oc.address,
-      barrio: null,
+      barrio: oc.addr_neighbourhood || null,
       lat: oc.lat,
       lng: oc.lng,
       geohash: geohashEncode(oc.lat, oc.lng),
@@ -315,11 +323,11 @@ export function mergeCourts(
       surface: oc.surface,
       has_lighting: oc.has_lighting,
       has_nets: null,
-      opening_hours: null,
+      opening_hours: oc.opening_hours || null,
       manager: null,
-      phone: null,
       email: null,
       website: null,
+      photo_urls: photoUrls,
       source: "osm",
       source_id: oc.source_id,
       confidence: "medium",

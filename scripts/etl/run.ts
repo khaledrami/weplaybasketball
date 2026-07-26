@@ -7,7 +7,8 @@
 import { extractDiba } from "./extractors/diba.ts";
 import { extractOsm } from "./extractors/osm.ts";
 import { extractAjuntament } from "./extractors/ajuntament.ts";
-import { mergeCourts } from "./merge.ts";
+import { mergeCourts, geohashEncode } from "./merge.ts";
+import { geocodeAndFixCoordinates, enrichUnnamedCourts, isUsable } from "./geocoder.ts";
 import { upsertCourts, insertDataSources, logEtlRun, getCourtCount } from "./db.ts";
 
 async function main() {
@@ -80,6 +81,23 @@ async function main() {
   for (const [s, n] of byAccess) console.log(`  ${s}: ${n}`);
   console.log();
 
+  // --- Geocode & Filter ---
+  console.log("=== PHASE 2.5: GEOCODE & FILTER ===\n");
+
+  // Filter out unusable courts (broken hoops)
+  const usable = merged.filter(isUsable);
+  const filtered = merged.length - usable.length;
+  if (filtered > 0) console.log(`[filter] Removed ${filtered} unusable courts\n`);
+
+  // Geocode named courts to verify/correct coordinates
+  const enriched = await enrichUnnamedCourts(usable);
+  const geocoded = await geocodeAndFixCoordinates(enriched);
+
+  // Re-geohash after coordinate corrections
+  for (const c of geocoded) {
+    c.geohash = geohashEncode(c.lat, c.lng);
+  }
+
   // --- Load ---
   console.log("=== PHASE 3: LOAD ===\n");
 
@@ -88,14 +106,14 @@ async function main() {
 
   let upserted = 0;
   try {
-    upserted = await upsertCourts(merged);
+    upserted = await upsertCourts(geocoded);
   } catch (err: any) {
     console.error(`[ERROR] Upsert failed: ${err.message}`);
     totalErrors++;
   }
 
   try {
-    await insertDataSources(merged);
+    await insertDataSources(geocoded);
   } catch (err: any) {
     console.error(`[ERROR] Audit insert failed: ${err.message}`);
     totalErrors++;
@@ -118,7 +136,8 @@ async function main() {
     diba: dibaExtracted,
     osm: osmExtracted,
     ajuntament: ajtExtracted,
-    merged: merged.length,
+    merged: geocoded.length,
+    filtered,
     elapsed_seconds: parseFloat(elapsed),
   });
 }

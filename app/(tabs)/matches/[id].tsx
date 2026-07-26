@@ -138,7 +138,7 @@ export default function MatchDetailScreen() {
           <Ionicons name="location" size={24} color="#007AFF" />
           <Text style={styles.courtName}>{match.court.name}</Text>
         </View>
-        <Text style={styles.courtAddress}>{match.court.address || 'Badalona'}</Text>
+        <Text style={styles.courtAddress}>{match.court.address || t('matches.defaultCity')}</Text>
         {match.court.barrio && (
           <Text style={styles.courtBarrio}>{match.court.barrio}</Text>
         )}
@@ -181,7 +181,7 @@ export default function MatchDetailScreen() {
           <Ionicons name="language" size={20} color="#8E8E93" />
           <Text style={styles.detailLabel}>{t('matches.language')}</Text>
           <Text style={styles.detailValue}>
-            {match.language === 'ca' ? 'Català' : match.language === 'es' ? 'Castellano' : t('matches.anyLanguage')}
+            {match.language === 'ca' ? t('matches.langCatalan') : match.language === 'es' ? t('matches.langSpanish') : t('matches.anyLanguage')}
           </Text>
         </View>
 

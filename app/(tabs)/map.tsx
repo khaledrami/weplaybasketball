@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, TextInput, TouchableOpacity, FlatList, Modal, Linking, Platform } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useTranslation } from '../../lib/i18n';
 import { fetchCourts, getCourtMarkerColor } from '../../lib/courts';
 import { Court } from '../../lib/types';
@@ -7,10 +8,10 @@ import { Ionicons } from '@expo/vector-icons';
 import WebMapView from '../../components/WebMapView';
 import PhotoUpload from '../../components/court/PhotoUpload';
 
-const COURT_TYPE_LABELS: Record<string, string> = {
-  outdoor: 'Exterior',
-  indoor: 'Interior',
-  covered: 'Cobert',
+const COURT_TYPE_KEYS: Record<string, string> = {
+  outdoor: 'map.exterior',
+  indoor: 'map.interior',
+  covered: 'map.covered',
 };
 
 const ACCESS_LABELS: Record<string, string> = {
@@ -28,8 +29,8 @@ function CourtListItem({ court, onPress, t }: { court: Court; onPress: () => voi
         <Text style={styles.listItemAddress}>{court.address || court.barrio || 'Badalona'}{court.barrio && court.address ? ` · ${court.barrio}` : ''}</Text>
         <View style={styles.listItemTags}>
           <Text style={styles.listItemTag}>{t(ACCESS_LABELS[court.access_type] ?? 'map.access_free')}</Text>
-          <Text style={styles.listItemTag}>{court.hoops || 2} cistelles</Text>
-          <Text style={styles.listItemTag}>{COURT_TYPE_LABELS[court.court_type ?? 'outdoor'] ?? court.court_type}</Text>
+          <Text style={styles.listItemTag}>{court.hoops || 2} {t('map.hoops')}</Text>
+          <Text style={styles.listItemTag}>{t(COURT_TYPE_KEYS[court.court_type ?? 'outdoor'] ?? court.court_type)}</Text>
         </View>
       </View>
       <Ionicons name="chevron-forward" size={18} color="#C7C7CC" />
@@ -39,6 +40,7 @@ function CourtListItem({ court, onPress, t }: { court: Court; onPress: () => voi
 
 export default function MapScreen() {
   const { t } = useTranslation();
+  const router = useRouter();
   const [courts, setCourts] = useState<Court[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -105,7 +107,7 @@ export default function MapScreen() {
           onPress={() => setSelectedFilter(null)}
         >
           <Text style={[styles.filterText, selectedFilter === null && styles.filterTextActive]}>
-            Tot ({courts.length})
+            {t('map.all')} ({courts.length})
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -189,14 +191,14 @@ export default function MapScreen() {
                     onPress={() => Linking.openURL(`https://www.openstreetmap.org/?mlat=${selectedCourt.lat}&mlon=${selectedCourt.lng}#map=17/${selectedCourt.lat}/${selectedCourt.lng}`)}
                   >
                     <Ionicons name="map" size={16} color="#007AFF" />
-                    <Text style={styles.mapEmbedLinkText}>Obrir al mapa</Text>
+                    <Text style={styles.mapEmbedLinkText}>{t('map.open_in_map')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.mapEmbedLink}
                     onPress={() => Linking.openURL(`https://www.google.com/maps/@${selectedCourt.lat},${selectedCourt.lng},3a,75y,90t/data=!3m7!1e1!3m5!1sAF1QipMx!2e10!3e11!7i5376!8i2688`)}
                   >
                     <Ionicons name="videocam" size={16} color="#007AFF" />
-                    <Text style={styles.mapEmbedLinkText}>Street View</Text>
+                    <Text style={styles.mapEmbedLinkText}>{t('map.street_view')}</Text>
                   </TouchableOpacity>
                 </View>
 
@@ -211,20 +213,19 @@ export default function MapScreen() {
                   </View>
                   <View style={styles.modalInfoRow}>
                     <Ionicons name="basketball" size={20} color="#007AFF" />
-                    <Text style={styles.modalInfoText}>{selectedCourt.hoops || 2} cistelles</Text>
+                    <Text style={styles.modalInfoText}>{selectedCourt.hoops || 2} {t('map.hoops')}</Text>
                   </View>
                   <View style={styles.modalInfoRow}>
                     <Ionicons name="home" size={20} color="#007AFF" />
                     <Text style={styles.modalInfoText}>
-                      {selectedCourt.court_type === 'outdoor' ? 'Exterior' :
-                       selectedCourt.court_type === 'indoor' ? 'Interior' : 'Cobert'}
+                      {t(COURT_TYPE_KEYS[selectedCourt.court_type ?? 'outdoor'] ?? 'map.exterior')}
                     </Text>
                   </View>
                   {selectedCourt.has_lighting !== undefined && (
                     <View style={styles.modalInfoRow}>
                       <Ionicons name="bulb" size={20} color={selectedCourt.has_lighting ? '#34C759' : '#8E8E93'} />
                       <Text style={styles.modalInfoText}>
-                        {selectedCourt.has_lighting ? 'Il·luminada' : 'Sense il·luminació'}
+                        {selectedCourt.has_lighting ? t('map.lit') : t('map.no_lighting')}
                       </Text>
                     </View>
                   )}
@@ -232,14 +233,14 @@ export default function MapScreen() {
 
                 {selectedCourt.manager && (
                   <View style={styles.modalManager}>
-                    <Text style={styles.modalManagerLabel}>Gestor:</Text>
+                    <Text style={styles.modalManagerLabel}>{t('map.manager')}</Text>
                     <Text style={styles.modalManagerValue}>{selectedCourt.manager}</Text>
                   </View>
                 )}
 
                 {selectedCourt.phone && (
                   <View style={styles.modalManager}>
-                    <Text style={styles.modalManagerLabel}>Telèfon:</Text>
+                    <Text style={styles.modalManagerLabel}>{t('map.phone')}</Text>
                     <Text style={styles.modalManagerValue}>{selectedCourt.phone}</Text>
                   </View>
                 )}
@@ -265,10 +266,21 @@ export default function MapScreen() {
                   <Text style={styles.directionsButtonText}>{t('map.directions')}</Text>
                 </TouchableOpacity>
 
+                <TouchableOpacity
+                  style={styles.createMatchButton}
+                  onPress={() => {
+                    setShowCourtModal(false);
+                    router.push(`/(tabs)/matches/create?courtId=${selectedCourt.id}`);
+                  }}
+                >
+                  <Ionicons name="add-circle" size={20} color="#FFFFFF" />
+                  <Text style={styles.createMatchButtonText}>{t('map.create_match')}</Text>
+                </TouchableOpacity>
+
                 <View style={styles.modalSource}>
                   <Ionicons name="checkmark-circle" size={14} color={selectedCourt.confidence === 'high' ? '#34C759' : '#FF9500'} />
                   <Text style={styles.modalSourceLabel}>
-                    {selectedCourt.confidence === 'high' ? 'Dada verificada' : 'Dada aproximada'}
+                    {selectedCourt.confidence === 'high' ? t('map.verified_data') : t('map.approx_data')}
                   </Text>
                   <Text style={styles.modalSourceValue}>
                     {' · '}
@@ -510,6 +522,21 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   directionsButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  createMatchButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#34C759',
+    borderRadius: 12,
+    padding: 14,
+    marginTop: 8,
+    gap: 8,
+  },
+  createMatchButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',

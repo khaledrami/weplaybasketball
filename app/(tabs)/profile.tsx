@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -6,42 +6,20 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
-import { useRouter } from 'expo-router';
 import { useProfile } from '../../lib/profile';
 import { useTranslation } from '../../lib/i18n';
 import { supabase } from '../../lib/supabase';
 import { Position, DominantHand, SkillLevel } from '../../lib/types';
 
-const POSITIONS: { value: Position; label: string }[] = [
-  { value: 'base', label: 'Base' },
-  { value: 'aler', label: 'Aler' },
-  { value: 'pivot', label: 'Pivot' },
-  { value: 'flexible', label: 'Flexible' },
-];
-
-const HANDS: { value: DominantHand; label: string }[] = [
-  { value: 'left', label: 'Esquerra' },
-  { value: 'right', label: 'Dreta' },
-  { value: 'ambidextrous', label: 'Ambidextre' },
-];
-
-const LEVELS: { value: SkillLevel; label: string }[] = [
-  { value: 'muy_principiante', label: 'Molt principiant' },
-  { value: 'principiante', label: 'Principiant' },
-  { value: 'intermedi', label: 'Intermedi' },
-  { value: 'avancat', label: 'Avançat' },
-  { value: 'competitiu', label: 'Competitiu' },
-];
-
 export default function ProfileScreen() {
-  const { t } = useTranslation();
-  const router = useRouter();
+  const { t, locale, setLocale } = useTranslation();
   const [userId, setUserId] = useState<string | null>(null);
   const { profile, loading, updateProfile } = useProfile(userId || undefined);
   const [editing, setEditing] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     display_name: '',
     age: '',
@@ -50,6 +28,27 @@ export default function ProfileScreen() {
     dominant_hand: '' as DominantHand | '',
     level: 'intermedi' as SkillLevel,
   });
+
+  const POSITIONS = useMemo(() => [
+    { value: 'base' as Position, label: t('positions.base') },
+    { value: 'aler' as Position, label: t('positions.aler') },
+    { value: 'pivot' as Position, label: t('positions.pivot') },
+    { value: 'flexible' as Position, label: t('positions.flexible') },
+  ], [t]);
+
+  const HANDS = useMemo(() => [
+    { value: 'left' as DominantHand, label: t('hands.left') },
+    { value: 'right' as DominantHand, label: t('hands.right') },
+    { value: 'ambidextrous' as DominantHand, label: t('hands.ambidextrous') },
+  ], [t]);
+
+  const LEVELS = useMemo(() => [
+    { value: 'muy_principiante' as SkillLevel, label: t('levels.muy_principiante') },
+    { value: 'principiante' as SkillLevel, label: t('levels.principiante') },
+    { value: 'intermedi' as SkillLevel, label: t('levels.intermedi') },
+    { value: 'avancat' as SkillLevel, label: t('levels.avancat') },
+    { value: 'competitiu' as SkillLevel, label: t('levels.competitiu') },
+  ], [t]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -73,8 +72,10 @@ export default function ProfileScreen() {
   }, [profile]);
 
   const handleSave = async () => {
+    setErrorMsg(null);
+    setSuccessMsg(null);
     if (!formData.display_name.trim()) {
-      Alert.alert(t('common.error'), 'El nom és obligatori');
+      setErrorMsg(t('profile.name_required'));
       return;
     }
 
@@ -89,13 +90,12 @@ export default function ProfileScreen() {
 
     if (success) {
       setEditing(false);
-      Alert.alert(t('common.done'), 'Perfil actualitzat');
+      setSuccessMsg(t('profile.updated'));
     }
   };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    router.replace('/(auth)/login');
   };
 
   if (loading && !profile) {
@@ -114,11 +114,23 @@ export default function ProfileScreen() {
             {profile?.display_name?.charAt(0) || '?'}
           </Text>
         </View>
-        <Text style={styles.name}>{profile?.display_name || 'Sense nom'}</Text>
+        <Text style={styles.name}>{profile?.display_name || t('profile.no_name')}</Text>
         <Text style={styles.level}>
           {t(`levels.${profile?.level || 'intermedi'}`)}
         </Text>
       </View>
+
+      {errorMsg ? (
+        <View style={styles.errorBox}>
+          <Text style={styles.errorText}>{errorMsg}</Text>
+        </View>
+      ) : null}
+
+      {successMsg ? (
+        <View style={styles.successBox}>
+          <Text style={styles.successText}>{successMsg}</Text>
+        </View>
+      ) : null}
 
       <View style={styles.stats}>
         <View style={styles.stat}>
@@ -219,7 +231,7 @@ export default function ProfileScreen() {
           {profile?.age && (
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>{t('profile.age')}</Text>
-              <Text style={styles.detailValue}>{profile.age} anys</Text>
+              <Text style={styles.detailValue}>{profile.age} {t('profile.years')}</Text>
             </View>
           )}
           {profile?.height_cm && (
@@ -241,14 +253,36 @@ export default function ProfileScreen() {
             </View>
           )}
 
-          <TouchableOpacity style={styles.editButton} onPress={() => setEditing(true)}>
+          <TouchableOpacity style={styles.editButton} onPress={() => { setErrorMsg(null); setSuccessMsg(null); setEditing(true); }}>
             <Text style={styles.editButtonText}>{t('profile.edit')}</Text>
           </TouchableOpacity>
         </View>
       )}
 
+      <View style={styles.languageSection}>
+        <Text style={styles.languageLabel}>{t('profile.language_selector')}</Text>
+        <View style={styles.languageRow}>
+          <TouchableOpacity
+            style={[styles.languageButton, locale === 'ca' && styles.languageButtonActive]}
+            onPress={() => setLocale('ca')}
+          >
+            <Text style={[styles.languageButtonText, locale === 'ca' && styles.languageButtonTextActive]}>
+              Català
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.languageButton, locale === 'es' && styles.languageButtonActive]}
+            onPress={() => setLocale('es')}
+          >
+            <Text style={[styles.languageButtonText, locale === 'es' && styles.languageButtonTextActive]}>
+              Castellano
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
       <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
-        <Text style={styles.signOutText}>Tancar sessió</Text>
+        <Text style={styles.signOutText}>{t('profile.sign_out')}</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -293,6 +327,32 @@ const styles = StyleSheet.create({
   level: {
     fontSize: 16,
     color: '#8E8E93',
+  },
+  errorBox: {
+    backgroundColor: '#FFF2F2',
+    borderWidth: 1,
+    borderColor: '#FF3B30',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 16,
+  },
+  errorText: {
+    color: '#FF3B30',
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  successBox: {
+    backgroundColor: '#F0FFF0',
+    borderWidth: 1,
+    borderColor: '#34C759',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 16,
+  },
+  successText: {
+    color: '#34C759',
+    fontSize: 14,
+    textAlign: 'center',
   },
   stats: {
     flexDirection: 'row',
@@ -426,5 +486,41 @@ const styles = StyleSheet.create({
   signOutText: {
     color: '#FF3B30',
     fontSize: 16,
+  },
+  languageSection: {
+    marginTop: 24,
+    marginBottom: 8,
+  },
+  languageLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#8E8E93',
+    marginBottom: 8,
+  },
+  languageRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  languageButton: {
+    flex: 1,
+    height: 44,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F2F2F7',
+    borderWidth: 1,
+    borderColor: '#E5E5EA',
+  },
+  languageButtonActive: {
+    backgroundColor: '#007AFF',
+    borderColor: '#007AFF',
+  },
+  languageButtonText: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: '#000000',
+  },
+  languageButtonTextActive: {
+    color: '#FFFFFF',
   },
 });

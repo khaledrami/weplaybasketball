@@ -4,12 +4,14 @@
 const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
 
 const QUERY = `
-[out:json][timeout:60];
+[out:json][timeout:90];
 area["name"="Badalona"]["admin_level"="8"]->.searchArea;
 (
   node["sport"="basketball"](area.searchArea);
   way["sport"="basketball"](area.searchArea);
   relation["sport"="basketball"](area.searchArea);
+  node["leisure"="basketball_hoop"](area.searchArea);
+  way["sport"="basketball"]["leisure"="pitch"](area.searchArea);
 );
 out center body;
 `;
@@ -45,6 +47,10 @@ export interface ExtractedCourt {
   hoops: number | null;
   access_type: string | null;
   court_type: "outdoor" | "indoor" | "covered" | null;
+  image: string | null;
+  addr_neighbourhood: string | null;
+  addr_suburb: string | null;
+  opening_hours: string | null;
 }
 
 function parseOsmElement(el: any): OsmCourt {
@@ -125,6 +131,10 @@ function osmToExtracted(osm: OsmCourt): ExtractedCourt | null {
     hoops: hoopsCount,
     access_type: accessType,
     court_type: courtType,
+    image: osm.allTags?.image || null,
+    addr_neighbourhood: osm.allTags?.["addr:neighbourhood"] || osm.allTags?.["addr:suburb"] || null,
+    addr_suburb: osm.allTags?.["addr:suburb"] || null,
+    opening_hours: osm.allTags?.opening_hours || null,
   };
 }
 

@@ -1,17 +1,12 @@
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, TextInput, TouchableOpacity, Modal, Linking, Platform } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useTranslation } from '../../lib/i18n';
 import { fetchCourts, getCourtMarkerColor } from '../../lib/courts';
 import { Court } from '../../lib/types';
 import { Ionicons } from '@expo/vector-icons';
 import CourtMapView from '../../components/CourtMapView';
 import PhotoUpload from '../../components/court/PhotoUpload';
-
-const COURT_TYPE_LABELS: Record<string, string> = {
-  outdoor: 'Exterior',
-  indoor: 'Interior',
-  covered: 'Cobert',
-};
 
 const ACCESS_LABELS: Record<string, string> = {
   lliure: 'map.access_free',
@@ -21,6 +16,7 @@ const ACCESS_LABELS: Record<string, string> = {
 
 export default function MapScreen() {
   const { t } = useTranslation();
+  const router = useRouter();
   const [courts, setCourts] = useState<Court[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -88,7 +84,7 @@ export default function MapScreen() {
         onPress={() => setSelectedFilter(null)}
       >
         <Text style={[styles.filterText, selectedFilter === null && styles.filterTextActive]}>
-          Tot ({courts.length})
+          {t('map.all')} ({courts.length})
         </Text>
       </TouchableOpacity>
       <TouchableOpacity
@@ -146,7 +142,7 @@ export default function MapScreen() {
                 onPress={() => Linking.openURL(`https://www.google.com/maps/@${selectedCourt.lat},${selectedCourt.lng},3a,75y,90t/data=!3m7!1e1!3m5!1sAF1QipMx!2e10!3e11!7i5376!8i2688`)}
               >
                 <Ionicons name="videocam" size={18} color="#007AFF" />
-                <Text style={styles.streetViewText}>Veure a Street View</Text>
+                <Text style={styles.streetViewText}>{t('map.street_view')}</Text>
               </TouchableOpacity>
 
               <View style={styles.modalInfo}>
@@ -160,20 +156,20 @@ export default function MapScreen() {
                 </View>
                 <View style={styles.modalInfoRow}>
                   <Ionicons name="basketball" size={20} color="#007AFF" />
-                  <Text style={styles.modalInfoText}>{selectedCourt.hoops || 2} cistelles</Text>
+                  <Text style={styles.modalInfoText}>{selectedCourt.hoops || 2} {t('map.hoops')}</Text>
                 </View>
                 <View style={styles.modalInfoRow}>
                   <Ionicons name="home" size={20} color="#007AFF" />
                   <Text style={styles.modalInfoText}>
-                    {selectedCourt.court_type === 'outdoor' ? 'Exterior' :
-                     selectedCourt.court_type === 'indoor' ? 'Interior' : 'Cobert'}
+                    {selectedCourt.court_type === 'outdoor' ? t('map.exterior') :
+                     selectedCourt.court_type === 'indoor' ? t('map.interior') : t('map.covered')}
                   </Text>
                 </View>
                 {selectedCourt.has_lighting !== undefined && (
                   <View style={styles.modalInfoRow}>
                     <Ionicons name="bulb" size={20} color={selectedCourt.has_lighting ? '#34C759' : '#8E8E93'} />
                     <Text style={styles.modalInfoText}>
-                      {selectedCourt.has_lighting ? 'Il·luminada' : 'Sense il·luminació'}
+                      {selectedCourt.has_lighting ? t('map.lit') : t('map.no_lighting')}
                     </Text>
                   </View>
                 )}
@@ -181,14 +177,14 @@ export default function MapScreen() {
 
               {selectedCourt.manager && (
                 <View style={styles.modalManager}>
-                  <Text style={styles.modalManagerLabel}>Gestor:</Text>
+                  <Text style={styles.modalManagerLabel}>{t('map.manager')}</Text>
                   <Text style={styles.modalManagerValue}>{selectedCourt.manager}</Text>
                 </View>
               )}
 
               {selectedCourt.phone && (
                 <View style={styles.modalManager}>
-                  <Text style={styles.modalManagerLabel}>Telèfon:</Text>
+                  <Text style={styles.modalManagerLabel}>{t('map.phone')}</Text>
                   <Text style={styles.modalManagerValue}>{selectedCourt.phone}</Text>
                 </View>
               )}
@@ -211,10 +207,21 @@ export default function MapScreen() {
                 <Text style={styles.directionsButtonText}>{t('map.directions')}</Text>
               </TouchableOpacity>
 
+              <TouchableOpacity
+                style={styles.createMatchButton}
+                onPress={() => {
+                  setShowCourtModal(false);
+                  router.push(`/(tabs)/matches/create?courtId=${selectedCourt.id}`);
+                }}
+              >
+                <Ionicons name="add-circle" size={20} color="#FFFFFF" />
+                <Text style={styles.createMatchButtonText}>{t('map.create_match')}</Text>
+              </TouchableOpacity>
+
               <View style={styles.modalSource}>
                 <Ionicons name="checkmark-circle" size={14} color={selectedCourt.confidence === 'high' ? '#34C759' : '#FF9500'} />
                 <Text style={styles.modalSourceLabel}>
-                  {selectedCourt.confidence === 'high' ? 'Dada verificada' : 'Dada aproximada'}
+                  {selectedCourt.confidence === 'high' ? t('map.verified_data') : t('map.approx_data')}
                 </Text>
                 <Text style={styles.modalSourceValue}>
                   {' · '}
@@ -348,6 +355,21 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   directionsButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  createMatchButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#34C759',
+    borderRadius: 12,
+    padding: 14,
+    marginTop: 8,
+    gap: 8,
+  },
+  createMatchButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',

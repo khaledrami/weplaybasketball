@@ -10,29 +10,39 @@ import {
   Modal,
   FlatList,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from '../../../lib/i18n';
 import { createMatch } from '../../../lib/matches';
 import { fetchCourts } from '../../../lib/courts';
 import { Court, SkillLevel } from '../../../lib/types';
 import { Ionicons } from '@expo/vector-icons';
 
-const LEVELS: { value: SkillLevel | 'any'; label: string }[] = [
-  { value: 'any', label: 'Qualsevol' },
-  { value: 'muy_principiante', label: 'Molt principiant' },
-  { value: 'principiante', label: 'Principiant' },
-  { value: 'intermedi', label: 'Intermedi' },
-  { value: 'avancat', label: 'Avançat' },
-  { value: 'competitiu', label: 'Competitiu' },
-];
-
 const DURATIONS = [30, 45, 60, 90, 120];
-const MAX_PLAYERS = [4, 6, 8, 10, 12];
+const MAX_PLAYERS = [
+  { value: 2, label: '1v1' },
+  { value: 4, label: '2v2' },
+  { value: 6, label: '3v3' },
+  { value: 8, label: '4v4' },
+  { value: 10, label: '5v5' },
+  { value: 12, label: '6v6' },
+  { value: 14, label: '7v7' },
+  { value: 16, label: '8v8' },
+];
 
 export default function CreateMatchScreen() {
   const { t } = useTranslation();
+  const LEVELS: { value: SkillLevel | 'any'; label: string }[] = [
+    { value: 'any', label: t('matches.level_any') },
+    { value: 'muy_principiante', label: t('levels.muy_principiante') },
+    { value: 'principiante', label: t('levels.principiante') },
+    { value: 'intermedi', label: t('levels.intermedi') },
+    { value: 'avancat', label: t('levels.avancat') },
+    { value: 'competitiu', label: t('levels.competitiu') },
+  ];
   const router = useRouter();
+  const params = useLocalSearchParams<{ courtId?: string }>();
   const [courts, setCourts] = useState<Court[]>([]);
+  const [courtSearch, setCourtSearch] = useState('');
   const [showCourtPicker, setShowCourtPicker] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -55,22 +65,40 @@ export default function CreateMatchScreen() {
   const loadCourts = async () => {
     const data = await fetchCourts();
     setCourts(data);
+
+    // Pre-select court from query param (map → create flow)
+    if (params.courtId) {
+      const match = data.find(c => c.id === params.courtId);
+      if (match) {
+        setFormData(prev => ({ ...prev, court: match }));
+      }
+    }
   };
+
+  const filteredCourts = courts.filter((court) => {
+    if (!courtSearch) return true;
+    const q = courtSearch.toLowerCase();
+    return (
+      court.name.toLowerCase().includes(q) ||
+      court.address?.toLowerCase().includes(q) ||
+      court.barrio?.toLowerCase().includes(q)
+    );
+  });
 
   const handleCreate = async () => {
     if (!formData.court) {
-      Alert.alert(t('common.error'), 'Selecciona una pista');
+      Alert.alert(t('common.error'), t('matches.select_court'));
       return;
     }
 
     if (!formData.date || !formData.time) {
-      Alert.alert(t('common.error'), 'Selecciona data i hora');
+      Alert.alert(t('common.error'), t('matches.select_datetime'));
       return;
     }
 
     const scheduledAt = new Date(`${formData.date}T${formData.time}:00`);
     if (scheduledAt <= new Date()) {
-      Alert.alert(t('common.error'), 'La data i hora han de ser futures');
+      Alert.alert(t('common.error'), t('matches.future_datetime'));
       return;
     }
 
@@ -90,11 +118,11 @@ export default function CreateMatchScreen() {
     setLoading(false);
 
     if (match) {
-      Alert.alert(t('common.done'), 'Partit creat!', [
+      Alert.alert(t('common.done'), t('matches.created'), [
         { text: 'OK', onPress: () => router.back() },
       ]);
     } else {
-      Alert.alert(t('common.error'), 'Error al crear el partit');
+      Alert.alert(t('common.error'), t('matches.create_error'));
     }
   };
 
@@ -109,7 +137,7 @@ export default function CreateMatchScreen() {
           onPress={() => setShowCourtPicker(true)}
         >
           <Text style={formData.court ? styles.pickerText : styles.pickerPlaceholder}>
-            {formData.court ? formData.court.name : 'Seleccionar pista...'}
+            {formData.court ? formData.court.name : t('matches.court_placeholder')}
           </Text>
           <Ionicons name="chevron-down" size={20} color="#8E8E93" />
         </TouchableOpacity>
@@ -146,15 +174,15 @@ export default function CreateMatchScreen() {
         </View>
 
         <Text style={styles.label}>{t('matches.players')}</Text>
-        <View style={styles.optionsRow}>
+        <View style={styles.optionsWrap}>
           {MAX_PLAYERS.map((p) => (
             <TouchableOpacity
-              key={p}
-              style={[styles.option, formData.maxPlayers === p && styles.optionSelected]}
-              onPress={() => setFormData({ ...formData, maxPlayers: p })}
+              key={p.value}
+              style={[styles.option, formData.maxPlayers === p.value && styles.optionSelected]}
+              onPress={() => setFormData({ ...formData, maxPlayers: p.value })}
             >
-              <Text style={[styles.optionText, formData.maxPlayers === p && styles.optionTextSelected]}>
-                {p}
+              <Text style={[styles.optionText, formData.maxPlayers === p.value && styles.optionTextSelected]}>
+                {p.value} ({p.label})
               </Text>
             </TouchableOpacity>
           ))}
@@ -182,7 +210,7 @@ export default function CreateMatchScreen() {
             onPress={() => setFormData({ ...formData, language: 'ca' })}
           >
             <Text style={[styles.optionText, formData.language === 'ca' && styles.optionTextSelected]}>
-              Català
+              {t('matches.language_ca')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -190,7 +218,7 @@ export default function CreateMatchScreen() {
             onPress={() => setFormData({ ...formData, language: 'es' })}
           >
             <Text style={[styles.optionText, formData.language === 'es' && styles.optionTextSelected]}>
-              Castellano
+              {t('matches.language_es')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -198,7 +226,7 @@ export default function CreateMatchScreen() {
             onPress={() => setFormData({ ...formData, language: 'any' })}
           >
             <Text style={[styles.optionText, formData.language === 'any' && styles.optionTextSelected]}>
-              Qualsevol
+              {t('matches.language_any')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -218,7 +246,7 @@ export default function CreateMatchScreen() {
           style={[styles.input, styles.textArea]}
           value={formData.description}
           onChangeText={(v) => setFormData({ ...formData, description: v })}
-          placeholder="Opcional..."
+          placeholder={t('matches.optional')}
           multiline
           numberOfLines={3}
         />
@@ -248,28 +276,49 @@ export default function CreateMatchScreen() {
                 <Ionicons name="close" size={24} color="#8E8E93" />
               </TouchableOpacity>
             </View>
+            <View style={styles.courtSearchBox}>
+              <Ionicons name="search" size={18} color="#8E8E93" />
+              <TextInput
+                style={styles.courtSearchInput}
+                placeholder={t('matches.court_search')}
+                value={courtSearch}
+                onChangeText={setCourtSearch}
+                autoFocus
+              />
+              {courtSearch !== '' && (
+                <TouchableOpacity onPress={() => setCourtSearch('')}>
+                  <Ionicons name="close-circle" size={18} color="#8E8E93" />
+                </TouchableOpacity>
+              )}
+            </View>
             <FlatList
-              data={courts}
+              data={filteredCourts}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  style={styles.courtItem}
+                  style={[styles.courtItem, formData.court?.id === item.id && styles.courtItemSelected]}
                   onPress={() => {
                     setFormData({ ...formData, court: item });
                     setShowCourtPicker(false);
+                    setCourtSearch('');
                   }}
                 >
                   <View style={styles.courtItemContent}>
                     <Text style={styles.courtItemName}>{item.name}</Text>
-                    <Text style={styles.courtItemAddress}>{item.address || 'Badalona'}</Text>
+                    <Text style={styles.courtItemAddress}>{item.address || item.barrio || 'Badalona'}</Text>
                   </View>
                   <View style={[styles.courtItemType, { backgroundColor: item.access_type === 'lliure' ? '#34C759' : item.access_type === 'restringit' ? '#FF3B30' : '#FF9500' }]}>
                     <Text style={styles.courtItemTypeText}>
-                      {item.access_type === 'lliure' ? 'Lliure' : item.access_type === 'restringit' ? 'Restringit' : 'Parcial'}
+                      {item.access_type === 'lliure' ? t('map.access_free') : item.access_type === 'restringit' ? t('map.access_restricted') : t('map.access_partial')}
                     </Text>
                   </View>
                 </TouchableOpacity>
               )}
+              ListEmptyComponent={
+                <View style={{ padding: 24, alignItems: 'center' }}>
+                  <Text style={{ color: '#8E8E93' }}>{t('matches.no_courts_found')}</Text>
+                </View>
+              }
             />
           </View>
         </View>
@@ -425,12 +474,29 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
   },
+  courtSearchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F2F2F7',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    height: 40,
+    marginBottom: 12,
+  },
+  courtSearchInput: {
+    flex: 1,
+    marginLeft: 8,
+    fontSize: 15,
+  },
   courtItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E5EA',
+  },
+  courtItemSelected: {
+    backgroundColor: '#F0F7FF',
   },
   courtItemContent: {
     flex: 1,

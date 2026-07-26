@@ -120,7 +120,7 @@ export default function AdminScreen() {
           <View key={court.id} style={styles.courtItem}>
             <View style={styles.courtInfo}>
               <Text style={styles.courtName}>{court.name}</Text>
-              <Text style={styles.courtAddress}>{court.address || 'Badalona'}</Text>
+              <Text style={styles.courtAddress}>{court.address || t('matches.defaultCity')}</Text>
             </View>
             <View style={styles.courtActions}>
               <TouchableOpacity style={styles.editButton}>
