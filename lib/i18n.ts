@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { I18n } from 'i18n-js';
-import { getLocales } from 'expo-localization';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ca from '../locales/ca.json';
 import es from '../locales/es.json';
@@ -13,8 +12,7 @@ const i18n = new I18n({
 i18n.defaultLocale = 'ca';
 i18n.enableFallback = true;
 
-const deviceLocale = getLocales()[0]?.languageCode;
-i18n.locale = deviceLocale === 'es' ? 'es' : 'ca';
+i18n.locale = 'ca';
 
 const LOCALE_KEY = 'app_locale';
 
